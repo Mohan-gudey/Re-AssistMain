@@ -10,7 +10,7 @@ import UseCasesSection from '../components/sections/UseCasesSection';
 import ResourcesSection from '../components/sections/ResourcesSection';
 import CTASection from '../components/sections/CTASection';
 import Footer from '../components/Footer';
-import LoginModal from '../components/LoginModal';
+import LoginModal from '../components/Login';
 
 const LandingPage = () => {
   const [showLogin, setShowLogin] = useState(false);
