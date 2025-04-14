@@ -1,9 +1,9 @@
+// File: src/components/ChatsComponent.js
 import React, { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 
-export default function ReAssist() {
+export default function ChatsComponent() {
   const navigate = useNavigate();
-  const [activeTab, setActiveTab] = useState("Chats");
   const [showInput, setShowInput] = useState(false);
   const [showPaperOptions, setShowPaperOptions] = useState(false);
   const [projectName, setProjectName] = useState("");
@@ -16,7 +16,7 @@ export default function ReAssist() {
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState("");
 
-  // Sample data for different tabs
+  // Sample data for papers
   const allReferencePapers = [
     "Reinforcement Learning for Robotics",
     "AI in Medical Imaging",
@@ -26,24 +26,6 @@ export default function ReAssist() {
     "Neural Networks in Autonomous Vehicles",
     "Explainable AI Methods",
     "Transfer Learning Approaches",
-  ];
-
-  const grants = [
-    { title: "NSF AI Research Grant", deadline: "May 15, 2025", amount: "$500,000" },
-    { title: "NIH Medical AI Innovation", deadline: "June 30, 2025", amount: "$750,000" },
-    { title: "DOE Energy Systems AI", deadline: "July 10, 2025", amount: "$1,200,000" }
-  ];
-
-  const conferences = [
-    { name: "International Conference on Machine Learning", date: "July 23-29, 2025", location: "Vienna, Austria" },
-    { name: "Neural Information Processing Systems", date: "December 5-12, 2025", location: "Montreal, Canada" },
-    { name: "ACM Conference on AI Ethics", date: "September 15-18, 2025", location: "San Francisco, USA" }
-  ];
-
-  const documents = [
-    { name: "Research Proposal Template", type: "Template", lastModified: "April 2, 2025" },
-    { name: "Literature Review Guidelines", type: "Guide", lastModified: "March 28, 2025" },
-    { name: "AI Ethics Framework", type: "Document", lastModified: "April 8, 2025" }
   ];
 
   // Project management functions
@@ -94,7 +76,6 @@ export default function ReAssist() {
     setProjects(updatedProjects);
   };
 
-  // Project selection no longer needs to manage showSearch since we show the search by default
   const handleProjectSelect = (index) => {
     setSelectedProjectIndex(index);
     setShowPaperOptions(false); // Reset to show the Add Papers button first
@@ -157,7 +138,6 @@ export default function ReAssist() {
     if (fileInputRef.current) fileInputRef.current.click();
   };
 
-  // Logout function
   const handleLogout = () => {
     navigate("/");
   };
@@ -169,6 +149,16 @@ export default function ReAssist() {
   };
 
   const tabs = ["Chats", "Documents", "Grants", "Conferences", "Help"];
+  const navigateToTab = (tab) => {
+    const routes = {
+      "Chats": "/",
+      "Documents": "/documents",
+      "Grants": "/grants",
+      "Conferences": "/conferences",
+      "Help": "/help"
+    };
+    navigate(routes[tab]);
+  };
 
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white font-sans overflow-hidden">
@@ -181,11 +171,11 @@ export default function ReAssist() {
               <button
                 key={tab}
                 className={`px-4 py-2 rounded-md ${
-                  activeTab === tab
+                  tab === "Chats"
                     ? "bg-indigo-600 font-semibold"
                     : "hover:bg-indigo-900 text-indigo-200"
                 }`}
-                onClick={() => setActiveTab(tab)}
+                onClick={() => navigateToTab(tab)}
               >
                 {tab}
               </button>
@@ -392,183 +382,77 @@ export default function ReAssist() {
 
         {/* Middle Content */}
         <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
-          {activeTab === "Chats" ? (
-            <div className="flex-1 flex flex-col p-4 overflow-hidden">
-              <div className="flex-1 overflow-y-auto">
-                {activePaper ? (
-                  <div className="bg-gray-800 rounded-md p-4">
-                    <h2 className="text-xl font-semibold text-indigo-300 mb-3">{activePaper.name}</h2>
-                    <div className="text-sm text-gray-300">
-                      <p>From project: {projects[activePaper.projectIndex].name}</p>
-                      <div className="mt-4 p-3 bg-gray-900 rounded-md">
-                        <p className="text-gray-400 mb-2">Paper content would display here</p>
-                        <p className="text-xs text-gray-500">This is a simulated view of the paper content. 
-                        In a real application, the paper would be rendered here.</p>
-                      </div>
+          <div className="flex-1 flex flex-col p-4 overflow-hidden">
+            <div className="flex-1 overflow-y-auto">
+              {activePaper ? (
+                <div className="bg-gray-800 rounded-md p-4">
+                  <h2 className="text-xl font-semibold text-indigo-300 mb-3">{activePaper.name}</h2>
+                  <div className="text-sm text-gray-300">
+                    <p>From project: {projects[activePaper.projectIndex].name}</p>
+                    <div className="mt-4 p-3 bg-gray-900 rounded-md">
+                      <p className="text-gray-400 mb-2">Paper content would display here</p>
+                      <p className="text-xs text-gray-500">This is a simulated view of the paper content. 
+                      In a real application, the paper would be rendered here.</p>
                     </div>
                   </div>
-                ) : selectedProjectIndex !== null ? (
-                  <div className="text-center mt-10">
-                    <p className="mb-2">Project: <span className="text-indigo-400 font-semibold">{projects[selectedProjectIndex].name}</span></p>
-                    <p>{projects[selectedProjectIndex].papers.length} papers added</p>
-                    <p className="mt-4">Ask me anything about your papers!</p>
-                    <p className="text-sm text-indigo-300 mt-2">Click on a paper in the left panel to view its contents</p>
-                  </div>
-                ) : (
-                  <div className="text-center mt-10">
-                    <p>Welcome to Re-Assist.</p>
-                    <p className="mt-2">Select or create a project to get started.</p>
-                  </div>
-                )}
+                </div>
+              ) : selectedProjectIndex !== null ? (
+                <div className="text-center mt-10">
+                  <p className="mb-2">Project: <span className="text-indigo-400 font-semibold">{projects[selectedProjectIndex].name}</span></p>
+                  <p>{projects[selectedProjectIndex].papers.length} papers added</p>
+                  <p className="mt-4">Ask me anything about your papers!</p>
+                  <p className="text-sm text-indigo-300 mt-2">Click on a paper in the left panel to view its contents</p>
+                </div>
+              ) : (
+                <div className="text-center mt-10">
+                  <p>Welcome to Re-Assist.</p>
+                  <p className="mt-2">Select or create a project to get started.</p>
+                </div>
+              )}
+            </div>
+
+            <div className="border-t border-indigo-900 pt-4">
+              <div className="flex gap-2">
+                <input
+                  className="flex-1 bg-gray-800 text-white p-2 rounded-md border border-indigo-800 focus:border-indigo-600 focus:outline-none"
+                  placeholder="Type a message"
+                  value={message}
+                  onChange={(e) => setMessage(e.target.value)}
+                  onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                />
+                <button 
+                  className="bg-indigo-600 hover:bg-indigo-700 p-2 rounded-md transition-colors"
+                  onClick={handleSendMessage}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                  </svg>
+                </button>
               </div>
 
-              <div className="border-t border-indigo-900 pt-4">
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 bg-gray-800 text-white p-2 rounded-md border border-indigo-800 focus:border-indigo-600 focus:outline-none"
-                    placeholder="Type a message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  />
-                  <button 
-                    className="bg-indigo-600 hover:bg-indigo-700 p-2 rounded-md transition-colors"
-                    onClick={handleSendMessage}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
+              <div className="flex items-center justify-between mt-2 gap-2">
+                <div className="flex items-center gap-2">
+                  <div className="bg-indigo-900/50 px-2 py-1 rounded-md text-sm text-indigo-300">
+                    citation:highlight
+                  </div>
+                  <input type="checkbox" defaultChecked className="text-indigo-600 focus:ring-indigo-500" />
                 </div>
-
-                <div className="flex items-center justify-between mt-2 gap-2">
-                  <div className="flex items-center gap-2">
-                    <div className="bg-indigo-900/50 px-2 py-1 rounded-md text-sm text-indigo-300">
-                      citation:highlight
-                    </div>
-                    <input type="checkbox" defaultChecked className="text-indigo-600 focus:ring-indigo-500" />
-                  </div>
-                  <div className="flex items-center gap-2">
-                    <select className="bg-gray-800 text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
-                      <option>simple</option>
-                      <option>detailed</option>
-                      <option>comprehensive</option>
-                    </select>
-                    <select className="bg-gray-800 text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
-                      <option>IEEE</option>
-                      <option>APA</option>
-                      <option>MLA</option>
-                      <option>Chicago</option>
-                    </select>
-                  </div>
+                <div className="flex items-center gap-2">
+                  <select className="bg-gray-800 text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
+                    <option>simple</option>
+                    <option>detailed</option>
+                    <option>comprehensive</option>
+                  </select>
+                  <select className="bg-gray-800 text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
+                    <option>IEEE</option>
+                    <option>APA</option>
+                    <option>MLA</option>
+                    <option>Chicago</option>
+                  </select>
                 </div>
               </div>
             </div>
-          ) : activeTab === "Documents" ? (
-            <div className="flex-1 p-4 overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-indigo-300">Document Management</h2>
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md transition-colors">
-                  + New Document
-                </button>
-              </div>
-              
-              <div className="bg-gray-800 rounded-md p-3">
-                <div className="flex justify-between text-sm font-semibold border-b border-gray-700 pb-2 mb-2 sticky top-0 bg-gray-800">
-                  <div className="w-1/2">Name</div>
-                  <div className="w-1/4">Type</div>
-                  <div className="w-1/4">Modified</div>
-                </div>
-                
-                {documents.map((doc, index) => (
-                  <div key={index} className="flex justify-between text-sm py-2 hover:bg-gray-700 rounded px-1 transition-colors">
-                    <div className="w-1/2 truncate">{doc.name}</div>
-                    <div className="w-1/4 text-indigo-300">{doc.type}</div>
-                    <div className="w-1/4 text-gray-400">{doc.lastModified}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : activeTab === "Grants" ? (
-            <div className="flex-1 p-4 overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-indigo-300">Research Grants</h2>
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md transition-colors">
-                  + Track New Grant
-                </button>
-              </div>
-              
-              <input
-                className="w-full bg-gray-800 text-white p-2 rounded-md mb-4 border border-indigo-800 focus:border-indigo-500 focus:outline-none"
-                placeholder="Search grants..."
-              />
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {grants.map((grant, index) => (
-                  <div key={index} className="bg-gray-800 p-4 rounded-md">
-                    <div className="font-semibold text-lg text-indigo-300">{grant.title}</div>
-                    <div className="flex justify-between mt-3">
-                      <div className="text-gray-400">Deadline: {grant.deadline}</div>
-                      <div className="text-indigo-400 font-semibold">{grant.amount}</div>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : activeTab === "Conferences" ? (
-            <div className="flex-1 p-4 overflow-y-auto">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold text-indigo-300">Conferences</h2>
-                <button className="bg-indigo-600 hover:bg-indigo-700 text-white py-2 px-4 rounded-md transition-colors">
-                  + Add Conference
-                </button>
-              </div>
-              
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {conferences.map((conf, index) => (
-                  <div key={index} className="bg-gray-800 p-4 rounded-md">
-                    <div className="font-semibold text-lg text-indigo-300">{conf.name}</div>
-                    <div className="text-gray-400 mt-2">{conf.date}</div>
-                    <div className="text-indigo-400 mt-1">{conf.location}</div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          ) : (
-            <div className="flex-1 p-4 overflow-y-auto">
-              <h2 className="text-xl font-semibold mb-4 text-indigo-300">Help Center</h2>
-              
-              <div className="space-y-4">
-                <div className="bg-gray-800 p-4 rounded-md">
-                  <h3 className="font-semibold mb-2 text-indigo-300">Quick Start Guide</h3>
-                  <ul className="list-disc pl-5 space-y-1 text-gray-300">
-                    <li>Create a new project using the "+ New Project" button</li>
-                    <li>Add papers to your project from our database or by URL</li>
-                    <li>Ask questions about your papers in the chat</li>
-                    <li>Export citations in your preferred format</li>
-                  </ul>
-                </div>
-                
-                <div className="bg-gray-800 p-4 rounded-md">
-                  <h3 className="font-semibold mb-2 text-indigo-300">Frequently Asked Questions</h3>
-                  <div className="space-y-3 text-gray-300">
-                    <div>
-                      <div className="font-medium">How do I add papers to my project?</div>
-                      <div className="text-gray-400">Use the drag & drop area or add paper URLs directly.</div>
-                    </div>
-                    <div>
-                      <div className="font-medium">What citation formats are supported?</div>
-                      <div className="text-gray-400">We support IEEE, APA, MLA, and Chicago styles.</div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-              
-              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md font-semibold mt-4 transition-colors">
-                Contact Support
-              </button>
-            </div>
-          )}
+          </div>
         </div>
 
         {/* Right Panel - Information */}
