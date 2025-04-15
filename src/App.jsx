@@ -804,6 +804,8 @@ import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Resources from './pages/Resources';
 import NotFound from './pages/NotFound';
+import Signup from './pages/Signup';
+import Login from './components/Login';
 
 const App = () => {
   // Simulating user authentication state (replace with actual auth logic)
@@ -821,7 +823,8 @@ const App = () => {
     <Routes>
       {/* Public routes */}
       <Route path="/" element={<LandingPage />} />
-      <Route path="/signin" element={<LandingPage />} />
+      <Route path="/signin" element={<Login />} />
+      <Route path="/signup" element={<Signup />} />
       <Route path="/resources" element={<Resources />} />
       
       {/* Protected route */}
