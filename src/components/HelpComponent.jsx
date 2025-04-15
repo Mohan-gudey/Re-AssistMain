@@ -1,80 +1,237 @@
-import React from "react";
+// File: src/components/HelpComponent.js
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
 export default function HelpComponent() {
   const navigate = useNavigate();
+  const [activeSection, setActiveSection] = useState("Getting Started");
+  const [searchQuery, setSearchQuery] = useState("");
   
-  const tabs = ["Chats", "Documents", "Grants", "Conferences", "Help"];
-  const navigateToTab = (tab) => {
-    const routes = {
-      "Chats": "/",
-      "Documents": "/documents",
-      "Grants": "/grants",
-      "Conferences": "/conferences",
-      "Help": "/help"
-    };
-    navigate(routes[tab]);
+  // Help topics organized by section
+  const helpContent = {
+    "Getting Started": [
+      {
+        title: "Welcome to Re-Assist",
+        content: "Re-Assist is an AI-powered research assistant that helps you organize papers, extract insights, and accelerate your research workflow. This guide will help you get the most out of the platform."
+      },
+      {
+        title: "Creating Your First Project",
+        content: "To get started, navigate to the Chats tab and click the '+ New Project' button. Give your project a name related to your research topic. Once created, you can add papers to your project."
+      },
+      {
+        title: "Adding Papers",
+        content: "There are multiple ways to add papers to your project: search our database, provide URLs to papers (e.g., from arXiv), or upload PDF files directly by dragging and dropping them."
+      },
+      {
+        title: "Asking Questions",
+        content: "Once you've added papers to your project, you can ask questions about them in the chat interface. Re-Assist will analyze your papers and provide insights, summaries, and answers based on the content."
+      }
+    ],
+    "Projects & Papers": [
+      {
+        title: "Managing Multiple Projects",
+        content: "You can create and manage multiple research projects. Each project can contain a different set of papers, allowing you to organize your research by topic, publication, or any other criteria."
+      },
+      {
+        title: "Supported Paper Formats",
+        content: "Re-Assist supports PDF, DOC, DOCX, and TXT file formats. For best results with PDFs, ensure they are text-searchable and not scanned images."
+      },
+      {
+        title: "Organizing Papers",
+        content: "Within each project, you can categorize papers, add notes, and highlight important sections. This helps you keep track of key information and quickly locate relevant content."
+      },
+      {
+        title: "Paper Analysis",
+        content: "Re-Assist automatically analyzes your papers to extract key information such as authors, publication date, abstract, methodology, results, and references. This makes it easier to find specific information."
+      }
+    ],
+    "Chat & Citations": [
+      {
+        title: "Conversational Interface",
+        content: "The chat interface allows you to have a natural conversation with Re-Assist about your papers. You can ask questions, request summaries, or explore specific topics mentioned in your papers."
+      },
+      {
+        title: "Citation Highlighting",
+        content: "When Re-Assist provides information from your papers, it includes citations to the source. Enable 'citation:highlight' to see exactly where the information comes from."
+      },
+      {
+        title: "Citation Formats",
+        content: "Re-Assist supports multiple citation formats including IEEE, APA, MLA, and Chicago. You can select your preferred format using the dropdown menu in the chat interface."
+      },
+      {
+        title: "Complex Queries",
+        content: "You can ask complex questions that span multiple papers. For example, 'What are the common findings across all these papers regarding neural network architectures?'"
+      }
+    ],
+    "Document Management": [
+      {
+        title: "Creating Documents",
+        content: "In the Documents tab, you can create new documents based on your research. These can be notes, literature reviews, research proposals, or any other type of document."
+      },
+      {
+        title: "Templates",
+        content: "Re-Assist provides various templates to help you get started with common document types like research proposals, literature reviews, and methodology sections."
+      },
+      {
+        title: "Collaborative Editing",
+        content: "You can share documents with collaborators, allowing for real-time editing and commenting. This makes it easy to work on research papers or proposals with colleagues."
+      },
+      {
+        title: "Export Options",
+        content: "Documents can be exported in multiple formats including PDF, DOCX, and LaTeX. This makes it easy to use your content in other applications or for submission to journals."
+      }
+    ],
+    "Grants & Conferences": [
+      {
+        title: "Finding Funding Opportunities",
+        content: "The Grants tab helps you discover relevant funding opportunities based on your research interests. You can filter by funding agency, deadline, and research area."
+      },
+      {
+        title: "Conference Tracking",
+        content: "In the Conferences tab, you can keep track of important academic conferences in your field. Set reminders for submission deadlines and receive notifications."
+      },
+      {
+        title: "Grant Writing Assistance",
+        content: "Re-Assist can help you draft sections of grant proposals based on your research papers. It can generate summaries, literature reviews, and methodology descriptions."
+      },
+      {
+        title: "Conference Paper Preparation",
+        content: "Prepare conference submissions with Re-Assist's help. Generate abstracts, outlines, and first drafts based on your existing research to speed up the submission process."
+      }
+    ],
+    "Account Settings": [
+      {
+        title: "Profile Management",
+        content: "Manage your profile information including name, email, and password. You can also update your research interests and preferences."
+      },
+      {
+        title: "Subscription Plans",
+        content: "View and manage your subscription plan. Re-Assist offers various tiers designed for individual researchers, teams, and institutions."
+      },
+      {
+        title: "Security Settings",
+        content: "Set up two-factor authentication, manage API keys, and review your account activity to keep your research data secure."
+      },
+      {
+        title: "Notification Preferences",
+        content: "Control which notifications you receive and how they're delivered. Get alerts for important deadlines, new grant opportunities, or when collaborators make changes."
+      }
+    ],
+    "Troubleshooting": [
+      {
+        title: "Common Issues",
+        content: "Solutions to common problems such as file upload errors, search issues, or performance concerns."
+      },
+      {
+        title: "Contact Support",
+        content: "Can't find what you're looking for? Contact our support team at support@reassist.ai or use the built-in chat support feature."
+      },
+      {
+        title: "System Requirements",
+        content: "Re-Assist works best on modern browsers including Chrome, Firefox, Safari, and Edge. For optimal performance, we recommend at least 8GB of RAM and a high-speed internet connection."
+      },
+      {
+        title: "Known Limitations",
+        content: "Current limitations include a maximum of 50 papers per project, file size limits of 50MB per upload, and support for English-language papers only (additional languages coming soon)."
+      }
+    ]
   };
+
+  // Sections for the sidebar
+  const sections = Object.keys(helpContent);
+
+  // Filter content based on search query
+  const getFilteredContent = () => {
+    if (!searchQuery.trim()) {
+      return helpContent[activeSection];
+    }
+    
+    const query = searchQuery.toLowerCase();
+    let results = [];
+    
+    // Search across all sections
+    Object.values(helpContent).forEach(section => {
+      section.forEach(item => {
+        if (
+          item.title.toLowerCase().includes(query) || 
+          item.content.toLowerCase().includes(query)
+        ) {
+          results.push(item);
+        }
+      });
+    });
+    
+    return results;
+  };
+
+  const filteredContent = getFilteredContent();
 
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white font-sans overflow-hidden">
-      {/* Main Header */}
-      <div className="bg-indigo-950 p-4 border-b border-indigo-800">
-        <div className="flex justify-between items-center">
-          <div className="text-xl font-semibold text-indigo-300">Re-Assist</div>
-          <div className="flex space-x-6">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                className={`px-4 py-2 rounded-md ${
-                  tab === "Help"
-                    ? "bg-indigo-600 font-semibold"
-                    : "hover:bg-indigo-900 text-indigo-200"
-                }`}
-                onClick={() => navigateToTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="w-32">
-            {/* Empty div for balance */}
-          </div>
-        </div>
-      </div>
+      {/* Main Header with Navigation Tabs */}
+      <Sidebar />
 
       <div className="flex flex-1 overflow-hidden">
-        {/* Left sidebar - simplified for Help */}
+        {/* Left sidebar - Help topics */}
         <div className="w-1/4 p-4 border-r border-indigo-900 bg-gray-900">
           <div className="mb-4">
             <h2 className="text-lg font-semibold text-indigo-300 mb-3">Help Center</h2>
             <p className="text-sm text-gray-400 mb-4">Get the most out of Re-Assist</p>
+            
+            <div className="relative">
+              <input
+                className="w-full bg-gray-800 text-white p-2 rounded-md mb-4 border border-gray-700 focus:border-indigo-500 focus:outline-none pl-8"
+                placeholder="Search help topics..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+              <svg 
+                xmlns="http://www.w3.org/2000/svg" 
+                className="h-4 w-4 absolute left-2 top-3 text-gray-400" 
+                fill="none" 
+                viewBox="0 0 24 24" 
+                stroke="currentColor"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+              </svg>
+              {searchQuery && (
+                <button 
+                  className="absolute right-2 top-2.5 text-gray-400 hover:text-white"
+                  onClick={() => setSearchQuery("")}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              )}
+            </div>
           </div>
           
           <div className="mt-4">
             <h3 className="text-sm font-medium text-indigo-300 mb-2">Help Topics</h3>
             <ul className="space-y-1">
-              {[
-                "Getting Started", 
-                "Projects & Papers", 
-                "Chat & Citations", 
-                "Document Management", 
-                "Grants & Conferences",
-                "Account Settings",
-                "Troubleshooting"
-              ].map((topic) => (
+              {sections.map((section) => (
                 <li 
-                  key={topic}
-                  className="flex items-center px-2 py-1 text-sm rounded hover:bg-gray-800 cursor-pointer"
+                  key={section}
+                  className={`flex items-center px-2 py-1 text-sm rounded cursor-pointer ${
+                    activeSection === section && !searchQuery
+                      ? "bg-indigo-900 text-indigo-200" 
+                      : "hover:bg-gray-800 text-gray-300"
+                  }`}
+                  onClick={() => {
+                    setActiveSection(section);
+                    setSearchQuery("");
+                  }}
                 >
-                  {topic}
+                  {section}
                 </li>
               ))}
             </ul>
           </div>
           
           <button 
-            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md mt-auto w-full"
+            className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md mt-8 w-full"
             onClick={() => navigate("/")}
           >
             Logout
@@ -83,57 +240,97 @@ export default function HelpComponent() {
 
         {/* Main content */}
         <div className="flex-1 p-4 overflow-y-auto bg-gray-900">
-          <h2 className="text-xl font-semibold mb-4 text-indigo-300">Help Center</h2>
-          
-          <div className="space-y-4">
-            <div className="bg-gray-800 p-4 rounded-md">
-              <h3 className="font-semibold mb-2 text-indigo-300">Quick Start Guide</h3>
-              <ul className="list-disc pl-5 space-y-1 text-gray-300">
-                <li>Create a new project using the "+ New Project" button</li>
-                <li>Add papers to your project from our database or by URL</li>
-                <li>Ask questions about your papers in the chat</li>
-                <li>Export citations in your preferred format</li>
-              </ul>
-            </div>
-            
-            <div className="bg-gray-800 p-4 rounded-md">
-              <h3 className="font-semibold mb-2 text-indigo-300">Frequently Asked Questions</h3>
-              <div className="space-y-3 text-gray-300">
-                <div>
-                  <div className="font-medium">How do I add papers to my project?</div>
-                  <div className="text-gray-400">Use the drag & drop area or add paper URLs directly.</div>
-                </div>
-                <div>
-                  <div className="font-medium">What citation formats are supported?</div>
-                  <div className="text-gray-400">We support IEEE, APA, MLA, and Chicago styles.</div>
-                </div>
-                <div>
-                  <div className="font-medium">Can I collaborate with others on a project?</div>
-                  <div className="text-gray-400">Yes, you can invite collaborators from the project settings.</div>
-                </div>
-                <div>
-                  <div className="font-medium">How accurate are the AI-generated responses?</div>
-                  <div className="text-gray-400">Our AI provides highly accurate information based on your uploaded papers.</div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-gray-800 p-4 rounded-md">
-              <h3 className="font-semibold mb-2 text-indigo-300">Video Tutorials</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {["Getting Started with Re-Assist", "Advanced Paper Analysis", "Managing Citations"].map((video, index) => (
-                  <div key={index} className="bg-gray-700 p-3 rounded-md text-center hover:bg-gray-600 cursor-pointer">
-                    <div className="text-indigo-300 mb-2">{video}</div>
-                    <div className="text-xs text-gray-400">Watch Tutorial</div>
-                  </div>
-                ))}
-              </div>
+          <div className="flex justify-between items-center mb-4">
+            <h2 className="text-xl font-semibold text-indigo-300">
+              {searchQuery ? "Search Results" : activeSection}
+            </h2>
+            <div>
+              {searchQuery && (
+                <span className="text-sm text-gray-400">
+                  Found {filteredContent.length} result{filteredContent.length !== 1 ? 's' : ''}
+                </span>
+              )}
             </div>
           </div>
           
-          <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md font-semibold mt-4 transition-colors">
-            Contact Support
-          </button>
+          <div className="space-y-6">
+            {filteredContent.length > 0 ? (
+              filteredContent.map((item, index) => (
+                <div key={index} className="bg-gray-800 p-4 rounded-md">
+                  <h3 className="font-semibold text-lg mb-2 text-indigo-300">{item.title}</h3>
+                  <p className="text-gray-300">{item.content}</p>
+                </div>
+              ))
+            ) : (
+              <div className="text-center py-8">
+                <p className="text-gray-400">No help topics found matching your search.</p>
+                <button 
+                  className="mt-2 text-indigo-400 hover:text-indigo-300"
+                  onClick={() => setSearchQuery("")}
+                >
+                  Clear search
+                </button>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Right panel - Video tutorials and quick links */}
+        <div className="w-1/4 p-4 border-l border-indigo-900 flex flex-col overflow-hidden bg-gray-900">
+          <div className="flex justify-between items-center mb-3">
+            <div className="font-semibold text-indigo-300">Resources</div>
+            <button className="text-white text-sm bg-gray-700 p-1 rounded">⚙️</button>
+          </div>
+          
+          <div className="flex-1 overflow-y-auto space-y-4 pr-1">
+            <div className="bg-gray-800 p-3 rounded-md">
+              <h3 className="font-semibold text-sm mb-2 text-indigo-300">Video Tutorials</h3>
+              <ul className="space-y-3">
+                {[
+                  "Getting Started with Re-Assist", 
+                  "Adding and Managing Papers", 
+                  "Advanced Chat Techniques", 
+                  "Creating Documents from Research"
+                ].map((title, idx) => (
+                  <li 
+                    key={idx} 
+                    className="bg-gray-700 hover:bg-gray-600 p-2 rounded cursor-pointer flex items-center"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 text-indigo-400 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z" />
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                    </svg>
+                    <span className="text-sm">{title}</span>
+                  </li>
+                ))}
+              </ul>
+              <button className="mt-2 text-indigo-400 text-xs hover:text-indigo-300 w-full text-right">
+                View all videos →
+              </button>
+            </div>
+
+            <div className="bg-gray-800 p-3 rounded-md">
+              <h3 className="font-semibold text-sm mb-2 text-indigo-300">Quick Links</h3>
+              <ul className="space-y-1 text-sm">
+                <li className="text-indigo-400 hover:text-indigo-300 hover:underline cursor-pointer">Documentation</li>
+                <li className="text-indigo-400 hover:text-indigo-300 hover:underline cursor-pointer">API Reference</li>
+                <li className="text-indigo-400 hover:text-indigo-300 hover:underline cursor-pointer">Community Forum</li>
+                <li className="text-indigo-400 hover:text-indigo-300 hover:underline cursor-pointer">Feature Requests</li>
+                <li className="text-indigo-400 hover:text-indigo-300 hover:underline cursor-pointer">Changelog</li>
+              </ul>
+            </div>
+
+            <div className="bg-gray-800 p-3 rounded-md">
+              <h3 className="font-semibold text-sm mb-2 text-indigo-300">Need More Help?</h3>
+              <p className="text-xs text-gray-300 mb-3">Our support team is ready to assist you with any questions.</p>
+              <button className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md text-sm">
+                Contact Support
+              </button>
+              <div className="mt-2 text-center text-xs text-gray-400">
+                Support hours: Mon-Fri, 9am-6pm ET
+              </div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

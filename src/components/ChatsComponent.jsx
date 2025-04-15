@@ -1,6 +1,7 @@
 // File: src/components/ChatsComponent.js
 import React, { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
 export default function ChatsComponent() {
   const navigate = useNavigate();
@@ -148,44 +149,10 @@ export default function ChatsComponent() {
     }
   };
 
-  const tabs = ["Chats", "Documents", "Grants", "Conferences", "Help"];
-  const navigateToTab = (tab) => {
-    const routes = {
-      "Chats": "/",
-      "Documents": "/documents",
-      "Grants": "/grants",
-      "Conferences": "/conferences",
-      "Help": "/help"
-    };
-    navigate(routes[tab]);
-  };
-
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white font-sans overflow-hidden">
-      {/* Main Header */}
-      <div className="bg-indigo-950 p-4 border-b border-indigo-800">
-        <div className="flex justify-between items-center">
-          <div className="text-xl font-semibold text-indigo-300">Re-Assist</div>
-          <div className="flex space-x-6">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                className={`px-4 py-2 rounded-md ${
-                  tab === "Chats"
-                    ? "bg-indigo-600 font-semibold"
-                    : "hover:bg-indigo-900 text-indigo-200"
-                }`}
-                onClick={() => navigateToTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="w-32">
-            {/* Empty div for balance */}
-          </div>
-        </div>
-      </div>
+      {/* Main Header with Navigation Tabs */}
+      <Sidebar />
 
       {/* Main Content Area */}
       <div className="flex flex-1 overflow-hidden">
@@ -193,7 +160,7 @@ export default function ChatsComponent() {
         <div className="w-1/4 p-4 border-r border-indigo-900 flex flex-col overflow-hidden bg-gray-900">
           <div className="flex-1 overflow-y-auto mb-4">
             <button
-              className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2 rounded-md font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all mb-4"
+              className="w-full bg-gradient-to-r from-indigo-700 to-indigo-700 text-white py-2 rounded-md font-semibold hover:from-indigo-600 hover:to-indigo-600 transition-all mb-4"
               onClick={handleNewProjectClick}
             >
               + New Project

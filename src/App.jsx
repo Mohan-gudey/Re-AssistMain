@@ -796,18 +796,27 @@
 
 
 
-import React from 'react'
-import { Routes, Route, Navigate } from 'react-router-dom'
+import React, { useState, useEffect } from 'react';
+import { Routes, Route, Navigate } from 'react-router-dom';
 
 // Import all page components
-import LandingPage from './pages/LandingPage'
-import Dashboard from './pages/Dashboard'
-import Resources from './pages/Resources'
-import NotFound from './pages/NotFound'
-
-// Simple auth protection component
+import LandingPage from './pages/LandingPage';
+import Dashboard from './pages/Dashboard';
+import Resources from './pages/Resources';
+import NotFound from './pages/NotFound';
 
 const App = () => {
+  // Simulating user authentication state (replace with actual auth logic)
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    // Here, you would check if the user is authenticated (e.g., check a token or user session)
+    const userAuthStatus = localStorage.getItem('authStatus');
+    if (userAuthStatus === 'authenticated') {
+      setIsAuthenticated(true);
+    }
+  }, []);
+
   return (
     <Routes>
       {/* Public routes */}
@@ -815,11 +824,13 @@ const App = () => {
       <Route path="/signin" element={<LandingPage />} />
       <Route path="/resources" element={<Resources />} />
       
-      {/* Protected routes */}
+      {/* Protected route */}
       <Route 
-        path="/dashboard" 
+        path="/dashboard/*" 
         element={
+        
             <Dashboard />
+  
         } 
       />
       

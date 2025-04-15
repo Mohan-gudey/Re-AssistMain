@@ -1,5 +1,7 @@
+// File: src/components/DocumentsComponent.js
 import React from "react";
 import { useNavigate } from "react-router-dom";
+import Sidebar from "./Sidebar";
 
 export default function DocumentsComponent() {
   const navigate = useNavigate();
@@ -10,44 +12,10 @@ export default function DocumentsComponent() {
     { name: "AI Ethics Framework", type: "Document", lastModified: "April 8, 2025" }
   ];
 
-  const tabs = ["Chats", "Documents", "Grants", "Conferences", "Help"];
-  const navigateToTab = (tab) => {
-    const routes = {
-      "Chats": "/",
-      "Documents": "/documents",
-      "Grants": "/grants",
-      "Conferences": "/conferences",
-      "Help": "/help"
-    };
-    navigate(routes[tab]);
-  };
-
   return (
     <div className="flex flex-col h-screen bg-gray-950 text-white font-sans overflow-hidden">
-      {/* Main Header */}
-      <div className="bg-indigo-950 p-4 border-b border-indigo-800">
-        <div className="flex justify-between items-center">
-          <div className="text-xl font-semibold text-indigo-300">Re-Assist</div>
-          <div className="flex space-x-6">
-            {tabs.map((tab) => (
-              <button
-                key={tab}
-                className={`px-4 py-2 rounded-md ${
-                  tab === "Documents"
-                    ? "bg-indigo-600 font-semibold"
-                    : "hover:bg-indigo-900 text-indigo-200"
-                }`}
-                onClick={() => navigateToTab(tab)}
-              >
-                {tab}
-              </button>
-            ))}
-          </div>
-          <div className="w-32">
-            {/* Empty div for balance */}
-          </div>
-        </div>
-      </div>
+      {/* Main Header with Navigation Tabs */}
+      <Sidebar />
 
       <div className="flex flex-1 overflow-hidden">
         {/* Left sidebar - simplified in this version */}
@@ -117,3 +85,4 @@ export default function DocumentsComponent() {
     </div>
   );
 }
+
