@@ -1,12 +1,29 @@
 import { FaBrain } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const Header = ({ handleNav }) => {
+  const navigate = useNavigate();
+
+  const navigateToHero = () => {
+    // Option 1: Navigate to root/home page
+    navigate('/');
+    
+    // Option 2: Scroll to top/hero section
+    window.scrollTo({
+      top: 0,
+      behavior: 'smooth'
+    });
+  };
+
   return (
     <header className="bg-gray-900 bg-opacity-90 shadow-md sticky top-0 z-50 border-b border-gray-800">
       <div className="container mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex justify-between h-16 items-center">
-          {/* Logo */}
-          <div className="flex items-center">
+          {/* Logo with click handler */}
+          <div 
+            className="flex items-center cursor-pointer hover:opacity-80 transition-opacity" 
+            onClick={navigateToHero}
+          >
             <div className="bg-gradient-to-r from-blue-600 to-indigo-600 w-10 h-10 rounded-lg flex items-center justify-center mr-3">
               <FaBrain className="text-white text-xl" />
             </div>
@@ -43,7 +60,10 @@ const Header = ({ handleNav }) => {
           
           {/* Mobile menu button */}
           <div className="md:hidden">
-            <button className="bg-gray-800 p-2 rounded-md text-gray-300 hover:text-white">
+            <button 
+              onClick={() => handleNav('menu')}
+              className="bg-gray-800 p-2 rounded-md text-gray-300 hover:text-white"
+            >
               <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
               </svg>

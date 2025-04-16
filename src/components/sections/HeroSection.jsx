@@ -26,12 +26,7 @@ const HeroSection = ({ handleNav }) => {
                   Get Started
                   <FaArrowRight className="ml-2" />
                 </button>
-                <button 
-                  onClick={() => handleNav('demo')}
-                  className="bg-gray-800 hover:bg-gray-700 text-blue-400 border border-blue-800 px-6 py-3 rounded-lg font-medium text-lg transition-colors"
-                >
-                  Watch Demo
-                </button>
+                
               </div>
             </motion.div>
           </div>

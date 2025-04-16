@@ -1,6 +1,7 @@
 // src/components/Sidebar.js
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
+import { FaBrain } from 'react-icons/fa';
 import FeedbackForm from "./FeedbackForm";
 
 export default function Sidebar() {
@@ -39,7 +40,12 @@ export default function Sidebar() {
     <>
       <div className="bg-indigo-950 p-4 border-b border-indigo-800">
         <div className="flex justify-between items-center">
-          <div className="text-xl font-semibold text-indigo-300">Re-Assist</div>
+          <div className="flex items-center">
+            <div className="bg-gradient-to-r from-blue-600 to-indigo-600 w-8 h-8 rounded-lg flex items-center justify-center mr-2">
+              <FaBrain className="text-white text-lg" />
+            </div>
+            <span className="text-xl font-semibold text-indigo-300">RE-ASSIST</span>
+          </div>
           <div className="flex space-x-6">
             {tabs.map((tab) => (
               <button
