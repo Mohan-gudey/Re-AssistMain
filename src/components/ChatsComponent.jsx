@@ -16,18 +16,6 @@ export default function ChatsComponent() {
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState("");
 
-  // Sample data for papers
-  const allReferencePapers = [
-    "Reinforcement Learning for Robotics",
-    "AI in Medical Imaging",
-    "Large Language Models Explained",
-    "Quantum Computing Overview",
-    "Secure Federated Learning",
-    "Neural Networks in Autonomous Vehicles",
-    "Explainable AI Methods",
-    "Transfer Learning Approaches",
-  ];
-
   // Project management functions
   const handleNewProjectClick = () => {
     setShowInput(true);
@@ -64,7 +52,9 @@ export default function ChatsComponent() {
       updatedProjects[selectedProjectIndex].papers.push(paperUrl);
       setProjects(updatedProjects);
       setPaperUrl("");
-    } else if (!selectedProjectIndex) {
+    } else if (!paperUrl.trim()) {
+      alert("Please enter a URL");
+    } else {
       alert("Please select a project first");
     }
   };
@@ -86,6 +76,9 @@ export default function ChatsComponent() {
   };
 
   // File handling functions
+  const [droppedFiles, setDroppedFiles] = useState([]);
+  const [selectedFiles, setSelectedFiles] = useState([]);
+  
   const onDragOver = useCallback((e) => {
     e.preventDefault();
     setIsDragging(true);
@@ -102,30 +95,42 @@ export default function ChatsComponent() {
     
     if (e.dataTransfer.files && e.dataTransfer.files.length > 0 && selectedProjectIndex !== null) {
       const files = Array.from(e.dataTransfer.files);
-      
-      const updatedProjects = [...projects];
-      files.forEach(file => {
-        updatedProjects[selectedProjectIndex].papers.push(file.name);
-      });
-      
-      setProjects(updatedProjects);
+      setDroppedFiles(files);
     } else if (selectedProjectIndex === null) {
       alert("Please select a project first");
     }
-  }, [projects, selectedProjectIndex]);
+  }, [selectedProjectIndex]);
 
   const handleFileSelect = (e) => {
     if (e.target.files && e.target.files.length > 0 && selectedProjectIndex !== null) {
       const files = Array.from(e.target.files);
-      
-      const updatedProjects = [...projects];
-      files.forEach(file => {
-        updatedProjects[selectedProjectIndex].papers.push(file.name);
-      });
-      
-      setProjects(updatedProjects);
+      setSelectedFiles(files);
     } else if (selectedProjectIndex === null) {
       alert("Please select a project first");
+    }
+  };
+  
+  const handleUploadFiles = () => {
+    if (selectedProjectIndex !== null) {
+      const updatedProjects = [...projects];
+      
+      // Add dropped files
+      if (droppedFiles.length > 0) {
+        droppedFiles.forEach(file => {
+          updatedProjects[selectedProjectIndex].papers.push(file.name);
+        });
+        setDroppedFiles([]);
+      }
+      
+      // Add selected files
+      if (selectedFiles.length > 0) {
+        selectedFiles.forEach(file => {
+          updatedProjects[selectedProjectIndex].papers.push(file.name);
+        });
+        setSelectedFiles([]);
+      }
+      
+      setProjects(updatedProjects);
     }
   };
 
@@ -154,42 +159,57 @@ export default function ChatsComponent() {
         <div className="w-1/5 p-3 border-r border-indigo-900 flex flex-col overflow-hidden bg-gray-900">
           <div className="flex-1 overflow-y-auto mb-3">
             <button
-              className="w-full bg-gradient-to-r from-indigo-700 to-indigo-700 text-white py-1.5 rounded-md font-semibold hover:from-indigo-600 hover:to-indigo-600 transition-all mb-3 text-sm"
+              className="w-full bg-gradient-to-r from-indigo-600 to-indigo-800 text-white py-2 rounded-lg font-semibold hover:from-indigo-700 hover:to-indigo-900 transition-all mb-4 text-sm shadow-md hover:shadow-lg flex items-center justify-center gap-2"
               onClick={handleNewProjectClick}
             >
-              + New Project
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M10 3a1 1 0 011 1v5h5a1 1 0 110 2h-5v5a1 1 0 11-2 0v-5H4a1 1 0 110-2h5V4a1 1 0 011-1z" clipRule="evenodd" />
+              </svg>
+              New Project
             </button>
 
             {showInput && (
-              <div className="mt-2 mb-3">
+              <div className="mt-2 mb-4 bg-gray-800 p-3 rounded-lg shadow-md border border-indigo-800">
+                <label className="block text-indigo-300 text-xs font-medium mb-1">Project Name</label>
                 <input
-                  className="w-full bg-gray-800 text-white rounded-md p-1.5 mb-1.5 border border-indigo-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-sm"
+                  className="w-full bg-gray-700 text-white rounded-md p-2 mb-2 border border-indigo-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none text-sm"
                   placeholder="Enter project name"
                   value={projectName}
                   onChange={(e) => setProjectName(e.target.value)}
                 />
-                <button
-                  onClick={handleSaveProject}
-                  className="bg-indigo-600 hover:bg-indigo-700 w-full py-1 rounded-md text-xs"
-                >
-                  Save Project
-                </button>
+                <div className="flex gap-2">
+                  <button
+                    onClick={handleSaveProject}
+                    className="bg-indigo-600 hover:bg-indigo-700 flex-1 py-1.5 rounded-md text-sm font-medium transition-colors"
+                  >
+                    Save Project
+                  </button>
+                  <button 
+                    onClick={() => setShowInput(false)}
+                    className="bg-gray-700 hover:bg-gray-600 py-1.5 px-3 rounded-md text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                </div>
               </div>
             )}
 
             {projects.length > 0 && (
               <div className="text-xs mb-3">
-                <div className="mb-1 font-semibold text-indigo-300">
+                <div className="mb-2 font-semibold text-indigo-300 flex items-center gap-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path d="M7 3a1 1 0 000 2h6a1 1 0 100-2H7zM4 7a1 1 0 011-1h10a1 1 0 110 2H5a1 1 0 01-1-1zM2 11a2 2 0 012-2h12a2 2 0 012 2v4a2 2 0 01-2 2H4a2 2 0 01-2-2v-4z" />
+                  </svg>
                   Saved Projects
                 </div>
-                <ul className="space-y-1.5">
+                <ul className="space-y-2">
                   {projects.map((project, index) => (
                     <li
                       key={index}
-                      className={`bg-gray-800 p-1.5 rounded-md cursor-pointer hover:bg-gray-700 transition-colors ${
+                      className={`bg-gray-800 p-2 rounded-lg cursor-pointer hover:bg-gray-700 transition-colors ${
                         selectedProjectIndex === index
-                          ? "border-l-4 border-indigo-500 pl-1"
-                          : "pl-1.5"
+                          ? "border-l-4 border-indigo-500 pl-1.5 shadow-md"
+                          : "pl-2"
                       }`}
                       onClick={() => handleProjectSelect(index)}
                     >
@@ -209,11 +229,11 @@ export default function ChatsComponent() {
                       </div>
 
                       {project.papers.length > 0 && (
-                        <ul className="mt-1 text-xs text-gray-300 list-disc pl-4 max-h-24 overflow-y-auto">
+                        <ul className="mt-1.5 text-xs text-gray-300 list-disc pl-4 max-h-24 overflow-y-auto">
                           {project.papers.map((paper, idx) => (
                             <li 
                               key={idx} 
-                              className={`cursor-pointer hover:text-indigo-300 ${
+                              className={`cursor-pointer hover:text-indigo-300 py-0.5 ${
                                 activePaper && 
                                 activePaper.projectIndex === index && 
                                 activePaper.paperIndex === idx ? 
@@ -239,52 +259,46 @@ export default function ChatsComponent() {
             {selectedProjectIndex !== null && !showPaperOptions && (
               <div className="mt-3">
                 <button
-                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 rounded-md font-semibold transition-colors text-xs"
+                  className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-2 rounded-md font-semibold transition-colors text-sm flex items-center justify-center gap-2"
                   onClick={() => setShowPaperOptions(true)}
                 >
-                  + Add Papers
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M6 2a2 2 0 00-2 2v12a2 2 0 002 2h8a2 2 0 002-2V7.414A2 2 0 0015.414 6L12 2.586A2 2 0 0010.586 2H6zm5 6a1 1 0 10-2 0v2H7a1 1 0 100 2h2v2a1 1 0 102 0v-2h2a1 1 0 100-2h-2V8z" clipRule="evenodd" />
+                  </svg>
+                  Add Papers
                 </button>
               </div>
             )}
 
             {/* Paper Options - Only show after clicking Add Papers */}
             {showPaperOptions && selectedProjectIndex !== null && (
-              <div className="space-y-3 mt-3">
-                {/* Display direct paper options */}
-                <div className="mt-2">
-                  <h3 className="text-xs font-medium text-indigo-300 mb-1">Available papers:</h3>
-                  <ul className="space-y-1 max-h-32 overflow-y-auto text-xs bg-gray-800 rounded-md p-1">
-                    {allReferencePapers.map((paper, idx) => (
-                      <li
-                        key={idx}
-                        className="bg-gray-700 hover:bg-gray-600 p-1.5 rounded-md cursor-pointer transition-colors"
-                        onClick={() => handleAddPaperToProject(paper)}
-                      >
-                        {paper}
-                      </li>
-                    ))}
-                  </ul>
+              <div className="space-y-4 mt-3 bg-gray-800 p-3 rounded-lg shadow-md border border-indigo-900">
+                <div className="flex justify-between items-center">
+                  <h3 className="text-sm font-medium text-indigo-300">Add Papers</h3>
+                  <button 
+                    onClick={() => setShowPaperOptions(false)}
+                    className="text-gray-400 hover:text-white"
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                    </svg>
+                  </button>
                 </div>
 
                 {/* URL Input */}
                 <div>
-                  <div className="flex justify-between items-center mb-1">
-                    <label className="block text-xs text-indigo-300 font-medium">
-                      Add new paper URL
-                    </label>
-                    <span className="text-xs text-indigo-400">
-                      Adding to: {projects[selectedProjectIndex]?.name}
-                    </span>
-                  </div>
+                  <label className="block text-xs text-indigo-300 font-medium mb-1">
+                    Add paper URL
+                  </label>
                   <div className="flex gap-1 mb-3">
                     <input
-                      className="flex-1 bg-gray-800 text-white rounded-md p-1.5 border border-indigo-800 focus:border-indigo-500 focus:outline-none text-xs"
+                      className="flex-1 bg-gray-700 text-white rounded-md p-2 border border-indigo-800 focus:border-indigo-500 focus:outline-none text-xs"
                       placeholder="https://arxiv.org/abs/xxx"
                       value={paperUrl}
                       onChange={(e) => setPaperUrl(e.target.value)}
                     />
                     <button
-                      className="bg-indigo-600 hover:bg-indigo-700 px-2 py-1 rounded-md text-xs"
+                      className="bg-indigo-600 hover:bg-indigo-700 px-3 py-1 rounded-md text-xs font-medium transition-colors"
                       onClick={handleAddPaperByUrl}
                     >
                       Add
@@ -292,28 +306,58 @@ export default function ChatsComponent() {
                   </div>
                   
                   {/* Drag & Drop Upload */}
-                  <div 
-                    className={`border-2 border-dashed rounded-md p-2 text-center ${
-                      isDragging ? "border-indigo-500 bg-indigo-900/20" : "border-indigo-800"
-                    }`}
-                    onDragOver={onDragOver}
-                    onDragLeave={onDragLeave}
-                    onDrop={onDrop}
-                    onClick={openFileSelector}
-                  >
-                    <p className="text-xs mb-1 text-indigo-200">
-                      {isDragging ? "Drop files here" : "Drag & drop papers or click to upload"}
-                    </p>
-                    <p className="text-xs text-indigo-400">
-                      PDF, DOC, DOCX, TXT files supported
-                    </p>
-                    <input
-                      type="file"
-                      ref={fileInputRef}
-                      className="hidden"
-                      multiple
-                      onChange={handleFileSelect}
-                    />
+                  <div className="mb-3">
+                    <div 
+                      className={`border-2 border-dashed rounded-lg p-4 text-center ${
+                        isDragging ? "border-indigo-500 bg-indigo-900/20" : "border-indigo-800 hover:border-indigo-600"
+                      } transition-colors cursor-pointer`}
+                      onDragOver={onDragOver}
+                      onDragLeave={onDragLeave}
+                      onDrop={onDrop}
+                      onClick={openFileSelector}
+                    >
+                      <div className="flex flex-col items-center justify-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-indigo-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12" />
+                        </svg>
+                        <p className="text-sm mb-1 text-indigo-200 font-medium">
+                          {isDragging ? "Drop files here" : "Drag & drop papers or click to upload"}
+                        </p>
+                        <p className="text-xs text-indigo-400">
+                          PDF, DOC, DOCX, TXT files supported
+                        </p>
+                      </div>
+                      <input
+                        type="file"
+                        ref={fileInputRef}
+                        className="hidden"
+                        multiple
+                        onChange={handleFileSelect}
+                      />
+                    </div>
+                    
+                    {/* File list and upload button */}
+                    {(droppedFiles.length > 0 || selectedFiles.length > 0) && (
+                      <div className="mt-2 bg-gray-700 rounded-md p-2">
+                        <div className="text-xs text-indigo-300 font-medium mb-1">
+                          {droppedFiles.length + selectedFiles.length} file(s) ready to upload:
+                        </div>
+                        <ul className="max-h-20 overflow-y-auto mb-2 text-xs text-gray-300">
+                          {[...droppedFiles, ...selectedFiles].map((file, idx) => (
+                            <li key={idx} className="truncate">• {file.name}</li>
+                          ))}
+                        </ul>
+                        <button
+                          onClick={handleUploadFiles}
+                          className="w-full bg-indigo-600 hover:bg-indigo-700 text-white py-1.5 rounded-md font-medium text-xs flex items-center justify-center gap-1"
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M3 17a1 1 0 011-1h12a1 1 0 110 2H4a1 1 0 01-1-1zM6.293 6.707a1 1 0 010-1.414l3-3a1 1 0 011.414 0l3 3a1 1 0 01-1.414 1.414L11 5.414V13a1 1 0 11-2 0V5.414L7.707 6.707a1 1 0 01-1.414 0z" clipRule="evenodd" />
+                          </svg>
+                          Upload Files
+                        </button>
+                      </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -321,7 +365,7 @@ export default function ChatsComponent() {
           </div>
 
           {/* Logout button at bottom with profile symbol */}
-          <div className="flex items-center justify-between bg-gray-800 hover:bg-gray-700 text-white px-3 py-1.5 rounded-md transition-colors text-xs">
+          <div className="flex items-center justify-between bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-md transition-colors text-xs">
             <div className="flex items-center">
               <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center mr-2">
                 <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -391,25 +435,7 @@ export default function ChatsComponent() {
               </div>
 
               <div className="flex items-center justify-between mt-2 gap-2">
-                {/* <div className="flex items-center gap-2">
-                  <div className="bg-indigo-900/50 px-2 py-0.5 rounded-md text-xs text-indigo-300">
-                    citation:highlight
-                  </div>
-                  <input type="checkbox" defaultChecked className="text-indigo-600 focus:ring-indigo-500 h-3 w-3" />
-                </div>
-                <div className="flex items-center gap-2">
-                  <select className="bg-gray-800 text-white p-0.5 rounded-md text-xs border border-indigo-800 focus:border-indigo-500 focus:outline-none">
-                    <option>simple</option>
-                    <option>detailed</option>
-                    <option>comprehensive</option>
-                  </select>
-                  <select className="bg-gray-800 text-white p-0.5 rounded-md text-xs border border-indigo-800 focus:border-indigo-500 focus:outline-none">
-                    <option>IEEE</option>
-                    <option>APA</option>
-                    <option>MLA</option>
-                    <option>Chicago</option>
-                  </select>
-                </div> */}
+                {/* Controls removed as per request */}
               </div>
             </div>
           </div>
