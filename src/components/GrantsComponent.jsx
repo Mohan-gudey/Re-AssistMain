@@ -11,8 +11,11 @@ export default function GrantsComponent() {
   const [showTrackModal, setShowTrackModal] = useState(false);
   const [showNotificationModal, setShowNotificationModal] = useState(false);
   const [showDetailsModal, setShowDetailsModal] = useState(false);
+  const [showApplyModal, setShowApplyModal] = useState(false);
   const [selectedGrant, setSelectedGrant] = useState(null);
   const [trackedGrants, setTrackedGrants] = useState([]);
+  const [appliedGrants, setAppliedGrants] = useState([]);
+  const [applicationProgress, setApplicationProgress] = useState({});
   const [notifications, setNotifications] = useState({
     email: true,
     deadline: true,
@@ -29,7 +32,13 @@ export default function GrantsComponent() {
       category: "Federal",
       description: "Supports innovative research in artificial intelligence with applications in critical domains.",
       eligibility: "Open to tenure-track faculty and research scientists at accredited US institutions.",
-      website: "https://nsf.gov/ai-research"
+      website: "https://nsf.gov/ai-research",
+      requirements: [
+        "Research proposal (max 15 pages)",
+        "Budget justification",
+        "CV of all investigators",
+        "Letter of support from institution"
+      ]
     },
     { 
       id: 2,
@@ -39,7 +48,14 @@ export default function GrantsComponent() {
       category: "Federal",
       description: "Funding for AI applications in healthcare diagnostics, treatment planning, and personalized medicine.",
       eligibility: "US-based researchers with MD or PhD in relevant fields.",
-      website: "https://nih.gov/medical-ai"
+      website: "https://nih.gov/medical-ai",
+      requirements: [
+        "Research plan (max 12 pages)",
+        "Preliminary data",
+        "IRB approval or plan",
+        "Biographical sketches",
+        "Budget and justification"
+      ]
     },
     { 
       id: 3,
@@ -49,7 +65,14 @@ export default function GrantsComponent() {
       category: "Federal",
       description: "Research funding for AI applications in energy grid optimization, renewable integration, and climate modeling.",
       eligibility: "US research institutions and national laboratories.",
-      website: "https://energy.gov/ai-grants"
+      website: "https://energy.gov/ai-grants",
+      requirements: [
+        "Technical narrative (max 20 pages)",
+        "Project schedule",
+        "Data management plan",
+        "Budget breakdown",
+        "Team qualifications"
+      ]
     },
     { 
       id: 4,
@@ -59,7 +82,14 @@ export default function GrantsComponent() {
       category: "Foundation",
       description: "Supports AI research addressing global health challenges in underserved regions.",
       eligibility: "Open to researchers worldwide with focus on low and middle income countries.",
-      website: "https://gatesfoundation.org/health-ai"
+      website: "https://gatesfoundation.org/health-ai",
+      requirements: [
+        "Project proposal (max 10 pages)",
+        "Implementation timeline",
+        "Budget and justification",
+        "Team composition and expertise",
+        "Ethics statement"
+      ]
     },
     { 
       id: 5,
@@ -69,7 +99,13 @@ export default function GrantsComponent() {
       category: "Industry",
       description: "Funding for research on ethical frameworks, bias detection, and responsible AI deployment.",
       eligibility: "Open to academic researchers and independent research organizations.",
-      website: "https://microsoft.com/research/ai-ethics"
+      website: "https://microsoft.com/research/ai-ethics",
+      requirements: [
+        "Research proposal",
+        "Statement of impact",
+        "CV of principal investigators",
+        "Budget"
+      ]
     },
     { 
       id: 6,
@@ -79,7 +115,13 @@ export default function GrantsComponent() {
       category: "International",
       description: "Supports groundbreaking AI research from European research institutions.",
       eligibility: "Researchers affiliated with institutions in EU member states or associated countries.",
-      website: "https://erc.europa.eu/ai-grants"
+      website: "https://erc.europa.eu/ai-grants",
+      requirements: [
+        "Full proposal",
+        "Host institution confirmation",
+        "Ethics review",
+        "Budget justification"
+      ]
     }
   ];
 
@@ -161,6 +203,43 @@ export default function GrantsComponent() {
       setTrackedGrants([...trackedGrants, grant]);
       // Show brief success message (in real app, this would be a toast)
       alert(`Now tracking: ${grant.title}`);
+    }
+  };
+
+  const handleApplyGrant = (grant) => {
+    setSelectedGrant(grant);
+    setShowApplyModal(true);
+  };
+
+  const submitApplication = (formData) => {
+    // Add grant to applied grants
+    if (!appliedGrants.some(g => g.id === selectedGrant.id)) {
+      setAppliedGrants([...appliedGrants, selectedGrant]);
+    }
+    
+    // Set initial progress to 10%
+    setApplicationProgress({
+      ...applicationProgress,
+      [selectedGrant.id]: 10
+    });
+    
+    // Close the modal
+    setShowApplyModal(false);
+    
+    // Show success message
+    alert(`Application started for: ${selectedGrant.title}`);
+  };
+
+  const getApplicationStatus = (grantId) => {
+    if (!appliedGrants.some(g => g.id === grantId)) {
+      return "Not Applied";
+    }
+    
+    const progress = applicationProgress[grantId] || 10;
+    if (progress < 100) {
+      return `In Progress (${progress}%)`;
+    } else {
+      return "Submitted";
     }
   };
 
@@ -249,6 +328,33 @@ export default function GrantsComponent() {
                 </ul>
               </div>
             )}
+
+            {appliedGrants.length > 0 && (
+              <div className="mt-6">
+                <h3 className="text-xs font-medium text-indigo-300 mb-1">My Applications ({appliedGrants.length})</h3>
+                <ul className="space-y-1 max-h-32 overflow-y-auto">
+                  {appliedGrants.map((grant) => (
+                    <li 
+                      key={grant.id}
+                      className="flex flex-col px-2 py-1 text-xs rounded bg-gray-800"
+                    >
+                      <div className="flex justify-between">
+                        <span className="truncate pr-1">{grant.title}</span>
+                        <span className="text-indigo-400 text-xs">
+                          {applicationProgress[grant.id] || 10}%
+                        </span>
+                      </div>
+                      <div className="w-full bg-gray-700 h-1 mt-1 rounded-full">
+                        <div 
+                          className="bg-indigo-500 h-1 rounded-full" 
+                          style={{ width: `${applicationProgress[grant.id] || 10}%` }}
+                        ></div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              </div>
+            )}
           </div>
           
           {/* Logout button at bottom with profile symbol */}
@@ -298,6 +404,19 @@ export default function GrantsComponent() {
                   <div className="text-gray-400 text-sm">Deadline: {grant.deadline}</div>
                   <div className="text-indigo-400 font-semibold text-sm">{grant.amount}</div>
                 </div>
+                {appliedGrants.some(g => g.id === grant.id) && (
+                  <div className="mt-2 flex items-center">
+                    <div className="text-xs text-green-400 mr-2">
+                      {getApplicationStatus(grant.id)}
+                    </div>
+                    <div className="w-full bg-gray-700 h-1 rounded-full flex-1">
+                      <div 
+                        className="bg-green-500 h-1 rounded-full" 
+                        style={{ width: `${applicationProgress[grant.id] || 10}%` }}
+                      ></div>
+                    </div>
+                  </div>
+                )}
                 <div className="flex mt-3 space-x-2">
                   <button 
                     className="bg-indigo-600 hover:bg-indigo-700 px-2 py-1 text-xs rounded-md transition-colors"
@@ -310,6 +429,12 @@ export default function GrantsComponent() {
                     onClick={() => handleQuickTrack(grant)}
                   >
                     {trackedGrants.some(g => g.id === grant.id) ? "Tracked" : "Track"}
+                  </button>
+                  <button 
+                    className="bg-emerald-700 hover:bg-emerald-600 px-2 py-1 text-xs rounded-md transition-colors"
+                    onClick={() => handleApplyGrant(grant)}
+                  >
+                    {appliedGrants.some(g => g.id === grant.id) ? "Continue" : "Apply"}
                   </button>
                 </div>
               </div>
@@ -383,6 +508,33 @@ export default function GrantsComponent() {
               </ul>
               <button className="mt-1 text-indigo-400 text-xs hover:text-indigo-300">
                 View all tips →
+              </button>
+            </div>
+
+            <div className="bg-gray-800 p-2 rounded-md">
+              <h3 className="font-semibold text-xs mb-1 text-indigo-300">My Applications</h3>
+              {appliedGrants.length > 0 ? (
+                <ul className="space-y-2 text-xs">
+                  {appliedGrants.map((grant) => (
+                    <li key={grant.id} className="flex flex-col">
+                      <div className="flex justify-between">
+                        <span className="text-gray-300 truncate">{grant.title}</span>
+                        <span className="text-emerald-400">{applicationProgress[grant.id] || 10}%</span>
+                      </div>
+                      <div className="w-full bg-gray-700 h-1 mt-1 rounded-full">
+                        <div 
+                          className="bg-emerald-500 h-1 rounded-full" 
+                          style={{ width: `${applicationProgress[grant.id] || 10}%` }}
+                        ></div>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p className="text-xs text-gray-400">No applications in progress</p>
+              )}
+              <button className="mt-2 text-indigo-400 text-xs hover:text-indigo-300">
+                View all applications →
               </button>
             </div>
           </div>
@@ -561,6 +713,15 @@ export default function GrantsComponent() {
               <h4 className="text-indigo-300 text-md font-semibold mb-2">Eligibility</h4>
               <p className="text-gray-300 text-sm">{selectedGrant.eligibility}</p>
             </div>
+
+            <div className="mb-4">
+              <h4 className="text-indigo-300 text-md font-semibold mb-2">Requirements</h4>
+              <ul className="text-gray-300 text-sm list-disc ml-5">
+                {selectedGrant.requirements.map((req, idx) => (
+                  <li key={idx}>{req}</li>
+                ))}
+              </ul>
+            </div>
             
             <div className="flex justify-end space-x-3">
               <button 
@@ -585,6 +746,129 @@ export default function GrantsComponent() {
               >
                 {trackedGrants.some(g => g.id === selectedGrant.id) ? "Already Tracked" : "Track This Grant"}
               </button>
+              <button 
+                className="px-3 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-md text-sm"
+                onClick={() => {
+                  setShowDetailsModal(false);
+                  handleApplyGrant(selectedGrant);
+                }}
+              >
+                {appliedGrants.some(g => g.id === selectedGrant.id) ? "Continue Application" : "Apply Now"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Apply for Grant Modal */}
+      {showApplyModal && selectedGrant && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center">
+          <div className="bg-gray-800 p-4 rounded-lg w-4/5 max-w-4xl max-h-2/3 overflow-y-auto">
+            <div className="flex justify-between items-center mb-4 sticky top-0 bg-gray-800 pt-1 pb-2 border-b border-gray-700">
+              <h3 className="text-indigo-300 text-xl font-semibold">Apply for {selectedGrant.title}</h3>
+              <button 
+                className="text-gray-400 hover:text-white bg-gray-700 hover:bg-gray-600 rounded-full p-1"
+                onClick={() => setShowApplyModal(false)}
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" viewBox="0 0 20 20" fill="currentColor">
+                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                </svg>
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <div className="bg-gray-900 p-3 rounded-md mb-4">
+                  <div className="flex items-center justify-between">
+                    <div className="text-gray-400 text-sm">Deadline: <span className="text-white">{selectedGrant.deadline}</span></div>
+                    <div className="text-indigo-400 font-semibold text-sm">{selectedGrant.amount}</div>
+                  </div>
+                  <div className="text-gray-400 text-sm mt-2">Category: <span className="text-white">{selectedGrant.category}</span></div>
+                </div>
+                
+                <div>
+                  <h4 className="text-indigo-300 text-md font-semibold mb-2">Quick Application</h4>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Project Title</label>
+                      <input 
+                        type="text" 
+                        className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm text-white"
+                        placeholder="Enter your project title"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm text-gray-300 mb-1">Principal Investigator</label>
+                      <input 
+                        type="text" 
+                        className="w-full bg-gray-700 border border-gray-600 rounded p-2 text-sm text-white"
+                        placeholder="Your name or lead researcher"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+              
+              <div>
+                <h4 className="text-indigo-300 text-md font-semibold mb-2">Required Documents</h4>
+                <div className="space-y-2 mb-4">
+                  {selectedGrant.requirements.slice(0, 4).map((req, idx) => (
+                    <div key={idx} className="bg-gray-700 p-2 rounded-md flex justify-between items-center">
+                      <div className="text-white text-sm">{req}</div>
+                      <button className="bg-indigo-600 hover:bg-indigo-500 text-white px-2 py-1 rounded text-xs">
+                        Upload
+                      </button>
+                    </div>
+                  ))}
+                  {selectedGrant.requirements.length > 4 && (
+                    <button className="text-indigo-400 text-sm hover:text-indigo-300">
+                      + {selectedGrant.requirements.length - 4} more documents
+                    </button>
+                  )}
+                </div>
+                
+                <div className="bg-gray-700 p-3 rounded-md">
+                  <h4 className="text-indigo-300 text-sm font-semibold mb-2">Application Steps</h4>
+                  <div className="flex justify-between items-center mb-3">
+                    <div className="flex items-center">
+                      <div className="bg-indigo-600 rounded-full text-white w-5 h-5 flex items-center justify-center mr-2 text-xs">1</div>
+                      <div className="text-white text-xs">Basic Info</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="bg-gray-600 rounded-full text-white w-5 h-5 flex items-center justify-center mr-2 text-xs">2</div>
+                      <div className="text-gray-400 text-xs">Documents</div>
+                    </div>
+                    <div className="flex items-center">
+                      <div className="bg-gray-600 rounded-full text-white w-5 h-5 flex items-center justify-center mr-2 text-xs">3</div>
+                      <div className="text-gray-400 text-xs">Submit</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div className="flex justify-between mt-6 border-t border-gray-700 pt-4">
+              <div className="flex items-center">
+                <div className="w-3 h-3 bg-emerald-500 rounded-full mr-2"></div>
+                <span className="text-gray-300 text-xs">Your application will be saved automatically</span>
+              </div>
+              <div className="space-x-2">
+                {/* <button 
+                  className="px-3 py-1.5 bg-gray-700 hover:bg-gray-600 rounded-md text-sm"
+                  onClick={() => setShowApplyModal(false)}
+                >
+                  Close
+                </button> */}
+                <button 
+                  className="px-4 py-1.5 bg-emerald-600 hover:bg-emerald-500 rounded-md text-sm flex items-center"
+                  onClick={() => submitApplication({})}
+                >
+                  <span>Start Application</span>
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 ml-1" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10.293 5.293a1 1 0 011.414 0l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414-1.414L12.586 11H5a1 1 0 110-2h7.586l-2.293-2.293a1 1 0 010-1.414z" clipRule="evenodd" />
+                  </svg>
+                </button>
+              </div>
             </div>
           </div>
         </div>

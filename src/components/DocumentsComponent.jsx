@@ -9,13 +9,19 @@ export default function DocumentsComponent() {
   const [newDocName, setNewDocName] = useState("");
   const [newDocType, setNewDocType] = useState("Document");
   const [documents, setDocuments] = useState([
-    { name: "Research Proposal Template", type: "Template", lastModified: "April 2, 2025" },
-    { name: "Literature Review Guidelines", type: "Guide", lastModified: "March 28, 2025" },
-    { name: "AI Ethics Framework", type: "Document", lastModified: "April 8, 2025" }
+    { id: 1, name: "Research Proposal Template", type: "Template", lastModified: "April 2, 2025" },
+    { id: 2, name: "Literature Review Guidelines", type: "Guide", lastModified: "March 28, 2025" },
+    { id: 3, name: "AI Ethics Framework", type: "Document", lastModified: "April 8, 2025" }
   ]);
   
   const [activeCategory, setActiveCategory] = useState("All Documents");
   const categories = ["All Documents", "Research Papers", "Notes", "Templates", "Guides"];
+  
+  // New state for showing document viewer and editing
+  const [selectedDocument, setSelectedDocument] = useState(null);
+  const [showDocViewer, setShowDocViewer] = useState(false);
+  const [isEditing, setIsEditing] = useState(false);
+  const [editedContent, setEditedContent] = useState("");
   
   const handleLogout = () => {
     navigate("/");
@@ -31,6 +37,7 @@ export default function DocumentsComponent() {
       const formattedDate = `${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getDate()}, ${currentDate.getFullYear()}`;
       
       const newDoc = {
+        id: documents.length + 1,
         name: newDocName,
         type: newDocType,
         lastModified: formattedDate
@@ -41,6 +48,54 @@ export default function DocumentsComponent() {
       setNewDocType("Document");
       setShowNewDocModal(false);
     }
+  };
+
+  // Function to handle opening a document
+  const handleOpenDocument = (doc) => {
+    setSelectedDocument(doc);
+    setShowDocViewer(true);
+    // Initialize edit content with placeholder text
+    setEditedContent("Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget ultricies nisl nunc eget nisl. Nullam euismod, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget ultricies nisl nunc eget nisl.");
+    setIsEditing(false);
+  };
+
+  // Function to close document viewer
+  const handleCloseViewer = () => {
+    setShowDocViewer(false);
+    setSelectedDocument(null);
+    setIsEditing(false);
+  };
+  
+  // Function to handle edit mode
+  const handleEdit = () => {
+    setIsEditing(true);
+  };
+  
+  // Function to save edited content
+  const handleSave = () => {
+    // In a real app, you would save the content to your backend
+    // For now, we'll just exit edit mode
+    setIsEditing(false);
+    
+    // Update the document's last modified date
+    const currentDate = new Date();
+    const formattedDate = `${currentDate.toLocaleString('default', { month: 'long' })} ${currentDate.getDate()}, ${currentDate.getFullYear()}`;
+    
+    // Update document in the documents array
+    const updatedDocuments = documents.map(doc => {
+      if (doc.id === selectedDocument.id) {
+        return { ...doc, lastModified: formattedDate };
+      }
+      return doc;
+    });
+    
+    setDocuments(updatedDocuments);
+    setSelectedDocument({...selectedDocument, lastModified: formattedDate});
+  };
+  
+  // Function to cancel editing
+  const handleCancelEdit = () => {
+    setIsEditing(false);
   };
 
   const filteredDocuments = activeCategory === "All Documents" 
@@ -128,7 +183,11 @@ export default function DocumentsComponent() {
             
             {filteredDocuments.length > 0 ? (
               filteredDocuments.map((doc, index) => (
-                <div key={index} className="flex justify-between text-sm py-2 hover:bg-gray-700 rounded px-1 transition-colors cursor-pointer">
+                <div 
+                  key={index} 
+                  className="flex justify-between text-sm py-2 hover:bg-gray-700 rounded px-1 transition-colors cursor-pointer"
+                  onClick={() => handleOpenDocument(doc)}
+                >
                   <div className="w-1/2 truncate">{doc.name}</div>
                   <div className="w-1/4 text-indigo-300">{doc.type}</div>
                   <div className="w-1/4 text-gray-400">{doc.lastModified}</div>
@@ -145,7 +204,7 @@ export default function DocumentsComponent() {
 
       {/* New Document Modal */}
       {showNewDocModal && (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center">
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-10">
           <div className="bg-gray-800 rounded-lg p-5 w-96">
             <h3 className="text-lg font-semibold text-indigo-300 mb-4">Create New Document</h3>
             
@@ -188,6 +247,85 @@ export default function DocumentsComponent() {
               >
                 Create
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Document Viewer Modal */}
+      {showDocViewer && selectedDocument && (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center z-10">
+          <div className="bg-gray-800 rounded-lg w-4/5 h-4/5 flex flex-col">
+            {/* Header */}
+            <div className="flex justify-between items-center border-b border-gray-700 p-4">
+              <div>
+                <h3 className="text-lg font-semibold text-indigo-300">{selectedDocument.name}</h3>
+                <p className="text-sm text-gray-400">{selectedDocument.type} • Last modified: {selectedDocument.lastModified}</p>
+              </div>
+              <button 
+                onClick={handleCloseViewer}
+                className="p-1 hover:bg-gray-700 rounded-full"
+              >
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+              </button>
+            </div>
+            
+            {/* Document content */}
+            <div className="flex-1 p-5 overflow-auto bg-gray-900">
+              {/* This is a placeholder for document content */}
+              <div className="p-4 bg-gray-800 rounded-md">
+                <p className="text-gray-300 mb-4">
+                  This is the content of "{selectedDocument.name}". {isEditing ? "You are now editing this document." : "In a real application, this would display the actual document content."}
+                </p>
+                <div className="bg-gray-900 p-4 rounded-md">
+                  <h4 className="font-medium text-indigo-300 mb-2">Document Content</h4>
+                  {isEditing ? (
+                    <textarea
+                      value={editedContent}
+                      onChange={(e) => setEditedContent(e.target.value)}
+                      className="w-full h-48 bg-gray-800 text-gray-300 p-3 rounded-md border border-gray-700 focus:outline-none focus:border-indigo-500"
+                    />
+                  ) : (
+                    <p className="text-gray-400">
+                      {editedContent || "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Nullam euismod, nisl eget ultricies tincidunt, nunc nisl aliquam nisl, eget ultricies nisl nunc eget nisl."}
+                    </p>
+                  )}
+                </div>
+              </div>
+            </div>
+            
+            {/* Footer with action buttons */}
+            <div className="border-t border-gray-700 p-4 flex justify-end space-x-3">
+              {isEditing ? (
+                <>
+                  <button 
+                    onClick={handleCancelEdit}
+                    className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm transition-colors"
+                  >
+                    Cancel
+                  </button>
+                  <button 
+                    onClick={handleSave}
+                    className="px-4 py-2 bg-green-600 hover:bg-green-700 rounded-md text-sm transition-colors"
+                  >
+                    Save Changes
+                  </button>
+                </>
+              ) : (
+                <>
+                  <button className="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded-md text-sm transition-colors">
+                    Download
+                  </button>
+                  <button 
+                    onClick={handleEdit}
+                    className="px-4 py-2 bg-indigo-600 hover:bg-indigo-700 rounded-md text-sm transition-colors"
+                  >
+                    Edit
+                  </button>
+                </>
+              )}
             </div>
           </div>
         </div>
