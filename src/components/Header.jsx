@@ -51,7 +51,7 @@ const Header = ({ handleNav }) => {
               Login
             </button>
             <button 
-              onClick={() => handleNav('login')}
+              onClick={() => handleNav('signup')}
               className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors"
             >
               Join Now

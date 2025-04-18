@@ -2,11 +2,13 @@
 import React, { useState, useRef, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
+import ResearchProfileComponent from "./ResearchProfileComponent";
 
 export default function ChatsComponent() {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
   const [showPaperOptions, setShowPaperOptions] = useState(false);
+  const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projects, setProjects] = useState([]);
   const [selectedProjectIndex, setSelectedProjectIndex] = useState(null);
@@ -15,6 +17,11 @@ export default function ChatsComponent() {
   const [activePaper, setActivePaper] = useState(null);
   const fileInputRef = useRef(null);
   const [message, setMessage] = useState("");
+  const [recommendations, setRecommendations] = useState([
+    "Check out 'Attention Is All You Need' for transformer architecture",
+    "Recent paper: 'Scaling Vision Transformers to 22 Billion Parameters'",
+    "Popular: 'Large Language Models Encode Clinical Knowledge'"
+  ]);
 
   // Project management functions
   const handleNewProjectClick = () => {
@@ -63,6 +70,23 @@ export default function ChatsComponent() {
     const updatedProjects = [...projects];
     updatedProjects[index].name = newName;
     setProjects(updatedProjects);
+  };
+
+  const handleDeleteProject = (e, index) => {
+    e.stopPropagation();
+    const updatedProjects = [...projects];
+    updatedProjects.splice(index, 1);
+    setProjects(updatedProjects);
+    
+    // Reset selected project if the deleted one was selected
+    if (selectedProjectIndex === index) {
+      setSelectedProjectIndex(null);
+      setActivePaper(null);
+      setShowPaperOptions(false);
+    } else if (selectedProjectIndex > index) {
+      // Adjust index if the deleted project was before the selected one
+      setSelectedProjectIndex(selectedProjectIndex - 1);
+    }
   };
 
   const handleProjectSelect = (index) => {
@@ -226,6 +250,14 @@ export default function ChatsComponent() {
                           }`}
                           onClick={(e) => e.stopPropagation()}
                         />
+                        <button
+                          className="text-gray-500 hover:text-red-500 transition-colors"
+                          onClick={(e) => handleDeleteProject(e, index)}
+                        >
+                          <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                          </svg>
+                        </button>
                       </div>
 
                       {project.papers.length > 0 && (
@@ -233,18 +265,39 @@ export default function ChatsComponent() {
                           {project.papers.map((paper, idx) => (
                             <li 
                               key={idx} 
-                              className={`cursor-pointer hover:text-indigo-300 py-0.5 ${
+                              className={`cursor-pointer hover:text-indigo-300 py-0.5 flex justify-between items-center ${
                                 activePaper && 
                                 activePaper.projectIndex === index && 
                                 activePaper.paperIndex === idx ? 
                                 "text-indigo-400 font-medium" : ""
                               }`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handlePaperSelect(paper, index, idx);
-                              }}
                             >
-                              {paper}
+                              <span 
+                                className="truncate mr-1"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePaperSelect(paper, index, idx);
+                                }}
+                              >
+                                {paper}
+                              </span>
+                              {/* Delete paper button - now always visible */}
+                              <button 
+                                className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  const updatedProjects = [...projects];
+                                  updatedProjects[index].papers.splice(idx, 1);
+                                  setProjects(updatedProjects);
+                                  if (activePaper && activePaper.projectIndex === index && activePaper.paperIndex === idx) {
+                                    setActivePaper(null);
+                                  }
+                                }}
+                              >
+                                <svg xmlns="http://www.w3.org/2000/svg" className="h-3 w-3" viewBox="0 0 20 20" fill="currentColor">
+                                  <path fillRule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clipRule="evenodd" />
+                                </svg>
+                              </button>
                             </li>
                           ))}
                         </ul>
@@ -364,21 +417,54 @@ export default function ChatsComponent() {
             )}
           </div>
 
-          {/* Logout button at bottom with profile symbol */}
-          <div className="flex items-center justify-between bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-md transition-colors text-xs">
-            <div className="flex items-center">
-              <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center mr-2">
-                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                  <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                </svg>
+          {/* User Profile Dropdown */}
+          <div className="relative">
+            <button 
+              className="flex items-center justify-between w-full bg-gray-800 hover:bg-gray-700 text-white px-3 py-2 rounded-md transition-colors text-xs"
+              onClick={() => setShowProfileOptions(prev => !prev)}
+            >
+              <div className="flex items-center">
+                <div className="w-6 h-6 rounded-full bg-indigo-600 flex items-center justify-center mr-2">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
+                  </svg>
+                </div>
+                <span>User</span>
               </div>
-              <span>User</span>
-            </div>
-            <button onClick={handleLogout}>
               <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
               </svg>
             </button>
+            
+            {/* Dropdown Menu */}
+            {showProfileOptions && (
+              <div className="absolute bottom-full left-0 right-0 mb-1 bg-gray-800 rounded-md shadow-lg border border-indigo-900 overflow-hidden z-10">
+                <button 
+                  className="flex items-center w-full px-4 py-2 text-xs text-white hover:bg-indigo-600 transition-colors text-left"
+                  onClick={() => {
+                    setShowProfileOptions(false);
+                    navigate("/profile");
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" viewBox="0 0 20 20" fill="currentColor">
+                    <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-6-3a2 2 0 11-4 0 2 2 0 014 0zm-2 4a5 5 0 00-4.546 2.916A5.986 5.986 0 0010 16a5.986 5.986 0 004.546-2.084A5 5 0 0010 11z" clipRule="evenodd" />
+                  </svg>
+                  Profile
+                </button>
+                <button 
+                  className="flex items-center w-full px-4 py-2 text-xs text-white hover:bg-indigo-600 transition-colors text-left"
+                  onClick={() => {
+                    setShowProfileOptions(false);
+                    handleLogout();
+                  }}
+                >
+                  <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                  </svg>
+                  Logout
+                </button>
+              </div>
+            )}
           </div>
         </div>
 
@@ -387,30 +473,136 @@ export default function ChatsComponent() {
           <div className="flex-1 flex flex-col p-3 overflow-hidden">
             <div className="flex-1 overflow-y-auto">
               {activePaper ? (
-                <div className="bg-gray-800 rounded-md p-3">
-                  <h2 className="text-lg font-semibold text-indigo-300 mb-2">{activePaper.name}</h2>
-                  <div className="text-xs text-gray-300">
-                    <p>From project: {projects[activePaper.projectIndex].name}</p>
-                    <div className="mt-3 p-2 bg-gray-900 rounded-md">
-                      <p className="text-gray-400 mb-2">Paper content would display here</p>
-                      <p className="text-xs text-gray-500">This is a simulated view of the paper content. 
-                      In a real application, the paper would be rendered here.</p>
+                <div className="bg-gray-800 rounded-md p-6 max-w-3xl mx-auto shadow-lg">
+                  <h2 className="text-xl font-semibold text-indigo-300 mb-3">{activePaper.name}</h2>
+                  <div className="border-b border-indigo-900 pb-2 mb-4">
+                    <p className="text-sm text-gray-300">From project: <span className="text-indigo-400">{projects[activePaper.projectIndex].name}</span></p>
+                    <p className="text-xs text-gray-400 mt-1">
+                      {activePaper.name.toLowerCase().endsWith('.docx') || activePaper.name.toLowerCase().endsWith('.doc') ? 
+                        'Word Document' : 
+                        activePaper.name.toLowerCase().endsWith('.pdf') ? 
+                        'PDF Document' : 
+                        activePaper.name.toLowerCase().endsWith('.txt') ? 
+                        'Text Document' : 
+                        'Document'}
+                    </p>
+                  </div>
+                  <div className="mt-3 p-4 bg-gray-900 rounded-md">
+                    {/* Document viewer based on file type */}
+                    {(activePaper.name.toLowerCase().endsWith('.docx') || 
+                      activePaper.name.toLowerCase().endsWith('.doc')) && (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-indigo-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <h3 className="text-indigo-300 text-lg font-medium mb-2">{activePaper.name}</h3>
+                        <p className="text-gray-400 text-center max-w-md">
+                          Word document preview is available. In a production environment, this would render the document content using appropriate libraries.
+                        </p>
+                        <button className="mt-4 bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                          onClick={() => {
+                            // Simulate document opening - in a real app, this would use a document viewer library
+                            alert(`Opening document: ${activePaper.name}`);
+                            // You would integrate a Word document viewer here in a production environment
+                            // For example: window.open(documentUrl, '_blank') or use a modal with a viewer component
+                          }}>
+                          Open document
+                        </button>
+                      </div>
+                    )}
+
+                    {activePaper.name.toLowerCase().endsWith('.pdf') && (
+                      <div className="flex flex-col items-center justify-center py-8">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-16 w-16 text-red-500 mb-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1} d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z" />
+                        </svg>
+                        <h3 className="text-red-400 text-lg font-medium mb-2">{activePaper.name}</h3>
+                        <p className="text-gray-400 text-center max-w-md">
+                          PDF preview is available. In a production environment, this would render the PDF content using appropriate libraries.
+                        </p>
+                        <button className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                          onClick={() => {
+                            // Simulate document opening - in a real app, this would use a PDF viewer
+                            alert(`Opening PDF: ${activePaper.name}`);
+                            // You would integrate a PDF viewer here in a production environment
+                            // For example: window.open(pdfUrl, '_blank') or use a PDF viewer component
+                          }}>
+                          Open PDF
+                        </button>
+                      </div>
+                    )}
+
+                    {(!activePaper.name.toLowerCase().endsWith('.docx') && 
+                      !activePaper.name.toLowerCase().endsWith('.doc') && 
+                      !activePaper.name.toLowerCase().endsWith('.pdf')) && (
+                      <div>
+                        <p className="text-gray-300 mb-3">Paper content would display here</p>
+                        <p className="text-sm text-gray-400">This is a simulated view of the paper content. 
+                        In a real application, the paper would be rendered here with full formatting and navigation options.</p>
+                      </div>
+                    )}
+                    
+                    <div className="mt-6 border-t border-indigo-900/50 pt-4">
+                      <h3 className="text-indigo-300 font-medium mb-2">Key insights</h3>
+                      <ul className="text-sm text-gray-300 space-y-1">
+                        <li>• This paper presents a novel approach to research</li>
+                        <li>• Methodology combines multiple disciplines</li>
+                        <li>• Results indicate significant improvements</li>
+                      </ul>
                     </div>
                   </div>
                 </div>
               ) : selectedProjectIndex !== null ? (
-                <div className="text-center mt-8">
-                  <h2 className="text-xl font-bold mb-3 bg-indigo-900/30 py-2 px-4 rounded-md inline-block">
-                    {projects[selectedProjectIndex].name}
-                  </h2>
-                  <p className="text-sm">{projects[selectedProjectIndex].papers.length} papers added</p>
-                  <p className="mt-3 text-sm">Ask me anything about your papers!</p>
-                  <p className="text-xs text-indigo-300 mt-2">Click on a paper in the left panel to view its contents</p>
+                <div className="max-w-3xl mx-auto">
+                  <div className="text-center mt-8">
+                    <h2 className="text-xl font-bold mb-3 bg-indigo-900/30 py-2 px-4 rounded-md inline-block">
+                      {projects[selectedProjectIndex].name}
+                    </h2>
+                    <p className="text-sm">{projects[selectedProjectIndex].papers.length} papers added</p>
+                    <p className="mt-3 text-sm">Ask me anything about your papers!</p>
+                    <p className="text-xs text-indigo-300 mt-2">Click on a paper in the left panel to view its contents</p>
+                  </div>
+                  
+                  {/* Paper recommendations section in the center */}
+                  {recommendations.length > 0 && (
+                    <div className="mt-8 bg-gray-800 rounded-lg p-4 shadow-md border border-indigo-900/50">
+                      <h3 className="text-indigo-300 font-medium text-sm mb-3 flex items-center gap-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                          <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                        </svg>
+                        Recommended Papers
+                      </h3>
+                      <ul className="space-y-2">
+                        {recommendations.map((rec, idx) => (
+                          <li key={idx} className="bg-gray-900 p-2 rounded text-sm hover:bg-indigo-900/30 transition-colors cursor-pointer">
+                            {rec}
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  )}
                 </div>
               ) : (
                 <div className="text-center mt-8">
                   <p className="text-sm">Welcome to Re-Assist.</p>
                   <p className="mt-2 text-sm">Select or create a project to get started.</p>
+                  
+                  {/* Paper recommendations for new users */}
+                  <div className="mt-8 max-w-lg mx-auto bg-gray-800 rounded-lg p-4 shadow-md border border-indigo-900/50">
+                    <h3 className="text-indigo-300 font-medium text-sm mb-3 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                      </svg>
+                      Trending Papers
+                    </h3>
+                    <ul className="space-y-2">
+                      {recommendations.map((rec, idx) => (
+                        <li key={idx} className="bg-gray-900 p-2 rounded text-sm hover:bg-indigo-900/30 transition-colors cursor-pointer">
+                          {rec}
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
                 </div>
               )}
             </div>
@@ -441,63 +633,11 @@ export default function ChatsComponent() {
           </div>
         </div>
 
-        {/* Right Panel - Information - Reduced width */}
-        <div className="w-1/5 p-3 border-l border-indigo-900 flex flex-col overflow-hidden bg-gray-900">
-          <div className="flex justify-between items-center mb-2">
-            <div className="font-semibold text-indigo-300 text-sm">Information panel</div>
-            <button className="text-white text-xs bg-gray-700 p-0.5 rounded">⛶</button>
-          </div>
-          
-          <div className="flex-1 overflow-y-auto space-y-3 pr-1">
-            {selectedProjectIndex !== null && (
-              <>
-                <div className="bg-gray-800 p-2 rounded-md">
-                  <h3 className="font-semibold text-xs mb-1 text-indigo-300">Project Summary</h3>
-                  <p className="text-xs">{projects[selectedProjectIndex].name}</p>
-                  <p className="text-xs text-indigo-400 mt-0.5">
-                    {projects[selectedProjectIndex].papers.length} papers
-                  </p>
-                </div>
-                
-                {projects[selectedProjectIndex].papers.length > 0 && (
-                  <div className="bg-gray-800 p-2 rounded-md">
-                    <h3 className="font-semibold text-xs mb-1 text-indigo-300">Recent Papers</h3>
-                    <ul className="space-y-0.5 text-xs max-h-24 overflow-y-auto">
-                      {projects[selectedProjectIndex].papers.slice(0, 3).map((paper, idx) => (
-                        <li 
-                          key={idx} 
-                          className="truncate text-gray-300 hover:text-indigo-300 cursor-pointer"
-                          onClick={() => handlePaperSelect(paper, selectedProjectIndex, idx)}
-                        >
-                          {paper}
-                        </li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-              </>
-            )}
-            
-            <div className="bg-gray-800 p-2 rounded-md">
-              <h3 className="font-semibold text-xs mb-1 text-indigo-300">Quick Tips</h3>
-              <ul className="text-xs space-y-1 text-gray-300">
-                <li>• Use specific questions for better answers</li>
-                <li>• Drag and drop files to add them quickly</li>
-                <li>• Enable citation highlighting for sources</li>
-              </ul>
-            </div>
-
-            {activePaper && (
-              <div className="bg-gray-800 p-2 rounded-md">
-                <h3 className="font-semibold text-xs mb-1 text-indigo-300">Paper Details</h3>
-                <div className="text-xs text-gray-300">
-                  <p className="mb-0.5"><span className="text-indigo-400">Title:</span> {activePaper.name}</p>
-                  <p><span className="text-indigo-400">Added to:</span> {projects[activePaper.projectIndex].name}</p>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
+        {/* Right Panel - Research Profile Component */}
+        <ResearchProfileComponent 
+          selectedProjectIndex={selectedProjectIndex} 
+          projects={projects} 
+        />
       </div>
     </div>
   );
