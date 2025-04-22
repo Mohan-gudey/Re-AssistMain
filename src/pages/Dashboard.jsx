@@ -636,12 +636,40 @@
 
 
 
+// import { Routes, Route, useLocation } from "react-router-dom";
+// import ChatsComponent from "../components/ChatsComponent";
+// import DocumentsComponent from "../components/DocumentsComponent";
+// import GrantsComponent from "../components/GrantsComponent";
+// import ConferencesComponent from "../components/ConferencesComponent";
+// import HelpComponent from "../components/HelpComponent";
+
+// function Dashboard() {
+//   return (
+//     <div>
+//       <Routes>
+//         <Route path="/" element={<ChatsComponent />} />
+//         <Route path="/chats" element={<ChatsComponent />} />
+//         <Route path="/documents" element={<DocumentsComponent />} />
+//         <Route path="/grants" element={<GrantsComponent />} />
+//         <Route path="/conferences" element={<ConferencesComponent />} />
+//         <Route path="/help" element={<HelpComponent />} />
+//       </Routes>
+//     </div>
+//   );
+// }
+
+// export default Dashboard;
+
+
+
 import { Routes, Route, useLocation } from "react-router-dom";
 import ChatsComponent from "../components/ChatsComponent";
 import DocumentsComponent from "../components/DocumentsComponent";
 import GrantsComponent from "../components/GrantsComponent";
 import ConferencesComponent from "../components/ConferencesComponent";
 import HelpComponent from "../components/HelpComponent";
+import ResearchProfilePage from "../components/ResearchProfilePage";
+import CollaboratorsComponent from "../components/CollaboratorsPage"; // Import the new component
 
 function Dashboard() {
   return (
@@ -650,9 +678,11 @@ function Dashboard() {
         <Route path="/" element={<ChatsComponent />} />
         <Route path="/chats" element={<ChatsComponent />} />
         <Route path="/documents" element={<DocumentsComponent />} />
+        <Route path="/collaborators" element={<CollaboratorsComponent />} /> {/* Add collaborators route */}
         <Route path="/grants" element={<GrantsComponent />} />
         <Route path="/conferences" element={<ConferencesComponent />} />
         <Route path="/help" element={<HelpComponent />} />
+        <Route path="/profile" element={<ResearchProfilePage />} />
       </Routes>
     </div>
   );
