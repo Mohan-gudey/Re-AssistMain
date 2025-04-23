@@ -175,7 +175,7 @@ export default function ResearchProfileComponent({ selectedProjectIndex, project
         </Panel>
         
         {/* Collaborators Section */}
-        <Panel>
+        {/* <Panel>
           <div className="flex justify-between items-center mb-1">
             <SectionHeader title="Collaborators" />
             <div className="flex items-center gap-2">
@@ -252,7 +252,7 @@ export default function ResearchProfileComponent({ selectedProjectIndex, project
               </ul>
             </>
           )}
-        </Panel>
+        </Panel> */}
 
         {/* Project Summary */}
         {hasProjectData && (
