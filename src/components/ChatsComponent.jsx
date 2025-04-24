@@ -820,7 +820,7 @@ export default function ChatsComponent() {
   const handleLogout = () => {
     // Clear any auth tokens or user data if needed
     localStorage.removeItem('authStatus');
-    navigate("/signin"); // Navigate to sign in page
+    navigate("/"); // Navigate to sign in page
   };
 
   const handleSendMessage = () => {
