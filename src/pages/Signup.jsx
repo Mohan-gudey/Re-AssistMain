@@ -50,7 +50,7 @@
 //       <motion.div
 //         initial={{ opacity: 0, scale: 0.9 }}
 //         animate={{ opacity: 1, scale: 1 }}
-//         className="bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative border border-gray-700"
+//         className=" rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative border border-gray-700"
 //       >
 //         <button
 //           className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
@@ -209,7 +209,7 @@
 //       <motion.div
 //         initial={{ opacity: 0, y: 50 }}
 //         animate={{ opacity: 1, y: 0 }}
-//         className="bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full relative border border-gray-700"
+//         className=" rounded-xl shadow-2xl p-8 max-w-md w-full relative border border-gray-700"
 //       >
 //         <div className="text-center mb-8">
 //           <div className="bg-gradient-to-r from-green-600 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
@@ -315,6 +315,169 @@
 // export default Signup;
 
 
+// import { useState } from 'react';
+// import { motion } from 'framer-motion';
+// import { FaUser, FaLock, FaBrain } from 'react-icons/fa';
+// import { useNavigate } from 'react-router-dom';
+// import { createUserWithEmailAndPassword } from 'firebase/auth';
+// import { sendEmailVerification } from 'firebase/auth';
+// import { auth } from '../firebase'; // adjust path as needed
+
+// const Signup = () => {
+//   const [email, setEmail] = useState('');
+//   const [password, setPassword] = useState('');
+//   const [confirmPassword, setConfirmPassword] = useState('');
+//   const [error, setError] = useState('');
+//   const [loading, setLoading] = useState(false);
+//   const navigate = useNavigate();
+  
+//   const handleSubmit = async (e) => {
+//     e.preventDefault();
+//     setError('');
+  
+//     if (password !== confirmPassword) {
+//       setError('Passwords do not match');
+//       return;
+//     }
+  
+//     setLoading(true);
+//     try {
+//       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+//       const user = userCredential.user;
+  
+//       // Send email verification
+//       await sendEmailVerification(user);
+  
+//       // Optionally store user info
+//       localStorage.setItem('isAuthenticated', 'true');
+//       localStorage.setItem('userEmail', user.email);
+  
+//       alert('Verification email sent! Please check your inbox.');
+//       navigate('/login');
+//     } catch (err) {
+//       switch (err.code) {
+//         case 'auth/email-already-in-use':
+//           setError('This email is already registered.');
+//           break;
+//         case 'auth/invalid-email':
+//           setError('Invalid email address.');
+//           break;
+//         case 'auth/weak-password':
+//           setError('Password should be at least 6 characters.');
+//           break;
+//         default:
+//           setError('Something went wrong. Please try again.');
+//       }
+//     } finally {
+//       setLoading(false);
+//     }
+//   };
+//   const handleSignIn = () => {
+//     navigate('/signin');
+//   };
+
+//   return (
+//     <div className="min-h-screen bg-black flex items-center justify-center px-4">
+//       <motion.div
+//         initial={{ opacity: 0, y: 50 }}
+//         animate={{ opacity: 1, y: 0 }}
+//         className=" rounded-xl shadow-2xl p-8 max-w-md w-full relative border border-gray-700"
+//       >
+//         <div className="text-center mb-8">
+//           <div className="bg-gradient-to-r from-green-600 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
+//             <FaBrain className="text-white text-2xl" />
+//           </div>
+//           <h2 className="text-2xl font-bold text-white">Create an account</h2>
+//           <p className="text-gray-300 mt-1">Sign up to get started</p>
+//         </div>
+
+//         {error && (
+//           <div className="mb-6 bg-red-900 bg-opacity-20 border-l-4 border-red-600 p-4 rounded">
+//             <p className="text-red-400">{error}</p>
+//           </div>
+//         )}
+
+//         <form onSubmit={handleSubmit} className="space-y-6">
+//           <div>
+//             <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+//             <div className="relative">
+//               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+//                 <FaUser className="h-5 w-5 text-gray-400" />
+//               </div>
+//               <input
+//                 type="email"
+//                 value={email}
+//                 onChange={(e) => setEmail(e.target.value)}
+//                 className="pl-10 w-full bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
+//                 placeholder="name@company.com"
+//                 required
+//               />
+//             </div>
+//           </div>
+
+//           <div>
+//             <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+//             <div className="relative">
+//               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+//                 <FaLock className="h-5 w-5 text-gray-400" />
+//               </div>
+//               <input
+//                 type="password"
+//                 value={password}
+//                 onChange={(e) => setPassword(e.target.value)}
+//                 className="pl-10 w-full bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
+//                 placeholder="••••••••"
+//                 required
+//               />
+//             </div>
+//           </div>
+
+//           <div>
+//             <label className="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+//             <div className="relative">
+//               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+//                 <FaLock className="h-5 w-5 text-gray-400" />
+//               </div>
+//               <input
+//                 type="password"
+//                 value={confirmPassword}
+//                 onChange={(e) => setConfirmPassword(e.target.value)}
+//                 className="pl-10 w-full bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
+//                 placeholder="••••••••"
+//                 required
+//               />
+//             </div>
+//           </div>
+
+//           <button
+//             type="submit"
+//             disabled={loading}
+//             className={`w-full flex justify-center py-3 px-4 rounded-lg text-white font-medium transition-all ${
+//               loading ? 'bg-green-700 opacity-70' : 'bg-green-600 hover:bg-green-700'
+//             }`}
+//           >
+//             {loading ? 'Creating account...' : 'Sign up'}
+//           </button>
+//         </form>
+
+//         <div className="text-sm text-gray-400 text-center mt-6">
+//           Already have an account?{' '}
+//           <button
+//             onClick={handleSignIn}
+//             className="font-medium text-green-400 hover:text-green-300 transition-all"
+//           >
+//             Sign in
+//           </button>
+//         </div>
+//       </motion.div>
+//     </div>
+//   );
+// };
+
+// export default Signup;
+
+
+
 import { useState } from 'react';
 import { motion } from 'framer-motion';
 import { FaUser, FaLock, FaBrain } from 'react-icons/fa';
@@ -372,34 +535,35 @@ const Signup = () => {
       setLoading(false);
     }
   };
+  
   const handleSignIn = () => {
     navigate('/signin');
   };
 
   return (
-    <div className="min-h-screen bg-black flex items-center justify-center px-4">
+    <div className="min-h-screen bg-gray-100 flex items-center justify-center px-4">
       <motion.div
         initial={{ opacity: 0, y: 50 }}
         animate={{ opacity: 1, y: 0 }}
-        className="bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full relative border border-gray-700"
+        className="rounded-xl shadow-lg p-8 max-w-md w-full relative border border-gray-300 bg-white"
       >
         <div className="text-center mb-8">
-          <div className="bg-gradient-to-r from-green-600 to-blue-600 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
+          <div className="bg-gradient-to-r from-green-500 to-blue-500 w-12 h-12 rounded-xl flex items-center justify-center mx-auto mb-4">
             <FaBrain className="text-white text-2xl" />
           </div>
-          <h2 className="text-2xl font-bold text-white">Create an account</h2>
-          <p className="text-gray-300 mt-1">Sign up to get started</p>
+          <h2 className="text-2xl font-bold text-gray-800">Create an account</h2>
+          <p className="text-gray-600 mt-1">Sign up to get started</p>
         </div>
 
         {error && (
-          <div className="mb-6 bg-red-900 bg-opacity-20 border-l-4 border-red-600 p-4 rounded">
-            <p className="text-red-400">{error}</p>
+          <div className="mb-6 bg-red-100 border-l-4 border-red-500 p-4 rounded">
+            <p className="text-red-500">{error}</p>
           </div>
         )}
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Email</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Email</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FaUser className="h-5 w-5 text-gray-400" />
@@ -408,7 +572,7 @@ const Signup = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="pl-10 w-full bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
+                className="pl-10 w-full bg-gray-50 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
                 placeholder="name@company.com"
                 required
               />
@@ -416,7 +580,7 @@ const Signup = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Password</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FaLock className="h-5 w-5 text-gray-400" />
@@ -425,7 +589,7 @@ const Signup = () => {
                 type="password"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                className="pl-10 w-full bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
+                className="pl-10 w-full bg-gray-50 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
                 placeholder="••••••••"
                 required
               />
@@ -433,7 +597,7 @@ const Signup = () => {
           </div>
 
           <div>
-            <label className="block text-sm font-medium text-gray-300 mb-1">Confirm Password</label>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Confirm Password</label>
             <div className="relative">
               <div className="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
                 <FaLock className="h-5 w-5 text-gray-400" />
@@ -442,7 +606,7 @@ const Signup = () => {
                 type="password"
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="pl-10 w-full bg-gray-700 border border-gray-600 text-white rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
+                className="pl-10 w-full bg-gray-50 border border-gray-300 text-gray-800 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-green-500 transition-all py-3"
                 placeholder="••••••••"
                 required
               />
@@ -453,18 +617,18 @@ const Signup = () => {
             type="submit"
             disabled={loading}
             className={`w-full flex justify-center py-3 px-4 rounded-lg text-white font-medium transition-all ${
-              loading ? 'bg-green-700 opacity-70' : 'bg-green-600 hover:bg-green-700'
+              loading ? 'bg-green-400 opacity-70' : 'bg-green-500 hover:bg-green-600'
             }`}
           >
             {loading ? 'Creating account...' : 'Sign up'}
           </button>
         </form>
 
-        <div className="text-sm text-gray-400 text-center mt-6">
+        <div className="text-sm text-gray-600 text-center mt-6">
           Already have an account?{' '}
           <button
             onClick={handleSignIn}
-            className="font-medium text-green-400 hover:text-green-300 transition-all"
+            className="font-medium text-green-500 hover:text-green-400 transition-all"
           >
             Sign in
           </button>

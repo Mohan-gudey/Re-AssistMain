@@ -195,7 +195,7 @@ const Resources = () => {
       case 'advanced':
         return 'bg-purple-900 text-purple-400';
       default:
-        return 'bg-gray-900 text-gray-400';
+        return ' text-gray-400';
     }
   };
   
@@ -230,7 +230,7 @@ const Resources = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 flex flex-col">
+    <div className="min-h-screen  text-gray-100 flex flex-col">
       <Header />
       
       <main className="flex-grow">
@@ -258,7 +258,7 @@ const Resources = () => {
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   placeholder="Search resources..."
-                  className="w-full pl-10 pr-4 py-3 rounded-lg bg-gray-800 border border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="w-full pl-10 pr-4 py-3 rounded-lg  border border-gray-700 text-white focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
                 />
                 {searchTerm && (
                   <button 
@@ -280,31 +280,31 @@ const Resources = () => {
             <div className="flex flex-wrap gap-2 mb-4 md:mb-0">
               <button
                 onClick={() => setActiveFilter('all')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'all' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
               >
                 All Resources
               </button>
               <button
                 onClick={() => setActiveFilter('guide')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'guide' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'guide' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
               >
                 Guides
               </button>
               <button
                 onClick={() => setActiveFilter('tutorial')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'tutorial' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'tutorial' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
               >
                 Tutorials
               </button>
               <button
                 onClick={() => setActiveFilter('video')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'video' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'video' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
               >
                 Videos
               </button>
               <button
                 onClick={() => setActiveFilter('documentation')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'documentation' ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'documentation' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
               >
                 Documentation
               </button>
@@ -316,7 +316,7 @@ const Resources = () => {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-4 py-2 rounded-lg  border border-gray-700 text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Levels</option>
                 <option value="beginner">Beginner</option>
@@ -328,7 +328,7 @@ const Resources = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 rounded-lg bg-gray-800 border border-gray-700 text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-4 py-2 rounded-lg  border border-gray-700 text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -359,7 +359,7 @@ const Resources = () => {
               {currentResources.map(resource => (
                 <div 
                   key={resource.id} 
-                  className={`bg-gray-800 rounded-xl border ${resource.featured ? 'border-blue-500' : 'border-gray-700'} overflow-hidden hover:border-blue-600 transition-colors transform hover:-translate-y-1 hover:shadow-xl duration-300`}
+                  className={` rounded-xl border ${resource.featured ? 'border-blue-500' : 'border-gray-700'} overflow-hidden hover:border-blue-600 transition-colors transform hover:-translate-y-1 hover:shadow-xl duration-300`}
                 >
                   <div className="p-6">
                     <div className="flex items-center mb-4">
@@ -402,7 +402,7 @@ const Resources = () => {
               ))}
             </div>
           ) : (
-            <div className="text-center py-16 bg-gray-800 rounded-xl border border-gray-700">
+            <div className="text-center py-16  rounded-xl border border-gray-700">
               <FaSearch className="mx-auto text-5xl text-gray-600 mb-4" />
               <h3 className="text-2xl text-gray-300 mb-2">No resources found</h3>
               <p className="text-gray-400 mb-6">Try adjusting your search or filters to find what you're looking for</p>
@@ -422,7 +422,7 @@ const Resources = () => {
                 <button 
                   onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
                   disabled={currentPage === 1}
-                  className={`px-4 py-2 rounded-lg flex items-center ${currentPage === 1 ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                  className={`px-4 py-2 rounded-lg flex items-center ${currentPage === 1 ? ' text-gray-600 cursor-not-allowed' : ' text-gray-400 hover:bg-gray-700'}`}
                 >
                   <FaArrowRight className="transform rotate-180 mr-1" /> Previous
                 </button>
@@ -431,7 +431,7 @@ const Resources = () => {
                   <button
                     key={page}
                     onClick={() => setCurrentPage(page)}
-                    className={`px-4 py-2 rounded-lg ${currentPage === page ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                    className={`px-4 py-2 rounded-lg ${currentPage === page ? 'bg-blue-600 text-white' : ' text-gray-400 hover:bg-gray-700'}`}
                   >
                     {page}
                   </button>
@@ -440,7 +440,7 @@ const Resources = () => {
                 <button 
                   onClick={() => setCurrentPage(prev => Math.min(prev + 1, totalPages))}
                   disabled={currentPage === totalPages}
-                  className={`px-4 py-2 rounded-lg flex items-center ${currentPage === totalPages ? 'bg-gray-800 text-gray-600 cursor-not-allowed' : 'bg-gray-800 text-gray-400 hover:bg-gray-700'}`}
+                  className={`px-4 py-2 rounded-lg flex items-center ${currentPage === totalPages ? ' text-gray-600 cursor-not-allowed' : ' text-gray-400 hover:bg-gray-700'}`}
                 >
                   Next <FaArrowRight className="ml-1" />
                 </button>
@@ -487,7 +487,7 @@ const Resources = () => {
                   </div>
                 </div>
               ) : (
-                <div className="text-center bg-gray-800 p-8 rounded-xl border border-gray-700">
+                <div className="text-center  p-8 rounded-xl border border-gray-700">
                   <div className="mb-6 inline-flex items-center justify-center w-16 h-16 rounded-full bg-green-900">
                     <FaCheck className="text-green-400 text-2xl" />
                   </div>

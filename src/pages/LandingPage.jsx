@@ -25,7 +25,7 @@
 //   };
 
 //   return (
-//     <div className="min-h-screen bg-gray-900 text-gray-100 relative overflow-hidden">
+//     <div className="min-h-screen  text-gray-100 relative overflow-hidden">
 //       {/* Particle Animation Background */}
 //       <ParticleAnimation />
       
@@ -92,7 +92,7 @@
 //   };
 
 //   return (
-//     <div className="min-h-screen bg-gray-900 text-gray-100 relative overflow-hidden">
+//     <div className="min-h-screen  text-gray-100 relative overflow-hidden">
 //       {/* Particle Background */}
 //       <ParticleAnimation />
 
@@ -160,7 +160,7 @@ const LandingPage = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-900 text-gray-100 relative overflow-hidden">
+    <div className="min-h-screen text-gray-100 relative overflow-hidden">
       {/* Particle Background */}
       <ParticleAnimation />
 

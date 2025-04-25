@@ -33,7 +33,7 @@ const ParticleAnimation = () => {
       }
       
       draw() {
-        ctx.fillStyle = 'rgba(80, 130, 230, 0.7)';
+        ctx.fillStyle = 'rgba(241, 102, 9, 0.7)';
         ctx.beginPath();
         ctx.arc(this.x, this.y, this.size, 0, Math.PI * 2);
         ctx.fill();
@@ -57,7 +57,7 @@ const ParticleAnimation = () => {
       draw() {
         if (this.distance < connectionDistance) {
           const opacity = 1 - (this.distance / connectionDistance);
-          ctx.strokeStyle = `rgba(80, 130, 230, ${opacity * 0.5})`;
+          ctx.strokeStyle = `rgba(241, 102, 9, ${opacity * 0.5})`;
           ctx.lineWidth = 1;
           ctx.beginPath();
           ctx.moveTo(this.p1.x, this.p1.y);

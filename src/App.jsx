@@ -189,12 +189,12 @@
 //   };
 
 //   return (
-//     <div className="min-h-screen bg-gray-900 text-gray-100 relative overflow-hidden">
+//     <div className="min-h-screen  text-gray-100 relative overflow-hidden">
 //       {/* Particle Animation Background */}
 //       <ParticleAnimation />
       
 //       {/* Header */}
-//       <header className="bg-gray-900 bg-opacity-90 shadow-md sticky top-0 z-50 border-b border-gray-800">
+//       <header className=" bg-opacity-90 shadow-md sticky top-0 z-50 border-b border-gray-800">
 //         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 //           <div className="flex justify-between h-16 items-center">
 //             {/* Logo */}
@@ -235,7 +235,7 @@
             
 //             {/* Mobile menu button */}
 //             <div className="md:hidden">
-//               <button className="bg-gray-800 p-2 rounded-md text-gray-300 hover:text-white">
+//               <button className=" p-2 rounded-md text-gray-300 hover:text-white">
 //                 <svg className="h-6 w-6" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
 //                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
 //                 </svg>
@@ -248,7 +248,7 @@
 //       {/* Main Content */}
 //       <main className="relative z-10">
 //         {/* Hero Section */}
-//         <section className="py-16 sm:py-24 bg-gray-900 relative">
+//         <section className="py-16 sm:py-24  relative">
 //           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 //             <div className="flex flex-col lg:flex-row items-center gap-10">
 //               <div className="lg:w-1/2 relative z-10">
@@ -273,7 +273,7 @@
 //                     </button>
 //                     <button 
 //                       onClick={() => handleNav('demo')}
-//                       className="bg-gray-800 hover:bg-gray-700 text-blue-400 border border-blue-800 px-6 py-3 rounded-lg font-medium text-lg transition-colors"
+//                       className=" hover:bg-gray-700 text-blue-400 border border-blue-800 px-6 py-3 rounded-lg font-medium text-lg transition-colors"
 //                     >
 //                       Watch Demo
 //                     </button>
@@ -285,12 +285,12 @@
 //                   initial={{ opacity: 0, scale: 0.9 }}
 //                   animate={{ opacity: 1, scale: 1 }}
 //                   transition={{ duration: 0.5, delay: 0.2 }}
-//                   className="bg-gray-800 rounded-2xl shadow-xl p-4 sm:p-6 relative overflow-hidden"
+//                   className=" rounded-2xl shadow-xl p-4 sm:p-6 relative overflow-hidden"
 //                 >
 //                   <div className="absolute top-0 right-0 -mt-6 -mr-6 w-24 h-24 bg-blue-900 rounded-full blur-xl opacity-30"></div>
 //                   <div className="absolute bottom-0 left-0 -mb-6 -ml-6 w-24 h-24 bg-indigo-900 rounded-full blur-xl opacity-30"></div>
                   
-//                   <div className="relative z-10 bg-gray-800 p-4 rounded-xl border border-gray-700">
+//                   <div className="relative z-10  p-4 rounded-xl border border-gray-700">
 //                     <div className="flex items-center mb-4">
 //                       <div className="w-10 h-10 rounded-full bg-blue-900 flex items-center justify-center mr-3">
 //                         <FaRobot className="text-blue-400" />
@@ -340,7 +340,7 @@
 //         </section>
 
 //         {/* Features Section */}
-//         <section className="py-16 bg-gray-800">
+//         <section className="py-16 ">
 //           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 //             <div className="text-center mb-16">
 //               <h2 className="text-3xl font-bold text-white mb-4">Key Features</h2>
@@ -388,7 +388,7 @@
 //                   whileInView={{ opacity: 1, y: 0 }}
 //                   transition={{ duration: 0.5, delay: index * 0.1 }}
 //                   viewport={{ once: true }}
-//                   className="bg-gray-900 rounded-xl shadow-lg border border-gray-700 p-6 hover:border-blue-700 transition-all"
+//                   className=" rounded-xl shadow-lg border border-gray-700 p-6 hover:border-blue-700 transition-all"
 //                 >
 //                   <div className="w-14 h-14 rounded-full bg-blue-900 bg-opacity-50 flex items-center justify-center mb-4">
 //                     {feature.icon}
@@ -402,7 +402,7 @@
 //         </section>
 
 //         {/* Use Cases */}
-//         <section className="py-16 bg-gray-900">
+//         <section className="py-16 ">
 //           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 //             <div className="text-center mb-16">
 //               <h2 className="text-3xl font-bold text-white mb-4">Use Cases</h2>
@@ -440,7 +440,7 @@
 //                   whileInView={{ opacity: 1, y: 0 }}
 //                   transition={{ duration: 0.5, delay: index * 0.1 }}
 //                   viewport={{ once: true }}
-//                   className="bg-gray-800 rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row border border-gray-700"
+//                   className=" rounded-xl shadow-lg overflow-hidden flex flex-col md:flex-row border border-gray-700"
 //                 >
 //                   <div className="md:w-2/5">
 //                     <div className="h-full bg-blue-900">
@@ -465,7 +465,7 @@
 //         </section>
 
 //         {/* Resources Section */}
-//         <section className="py-16 bg-gray-800">
+//         <section className="py-16 ">
 //           <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 //             <div className="text-center mb-16">
 //               <h2 className="text-3xl font-bold text-white mb-4">Resources</h2>
@@ -498,7 +498,7 @@
 //                   whileInView={{ opacity: 1, y: 0 }}
 //                   transition={{ duration: 0.5, delay: index * 0.1 }}
 //                   viewport={{ once: true }}
-//                   className="bg-gray-900 rounded-xl shadow-lg border border-gray-700 overflow-hidden hover:border-blue-700 transition-all"
+//                   className=" rounded-xl shadow-lg border border-gray-700 overflow-hidden hover:border-blue-700 transition-all"
 //                 >
 //                   <div className="h-40 bg-gradient-to-r from-blue-900 to-indigo-900 flex items-center justify-center">
 //                     <FaFileAlt className="text-blue-300 text-5xl" />
@@ -545,7 +545,7 @@
 //                 >
 //                   Start Free Trial
 //                 </button>
-//                 <button className="bg-gray-800 hover:bg-gray-700 text-blue-300 border border-blue-700 px-8 py-3 rounded-lg font-medium text-lg transition-colors">
+//                 <button className=" hover:bg-gray-700 text-blue-300 border border-blue-700 px-8 py-3 rounded-lg font-medium text-lg transition-colors">
 //                   Schedule Demo
 //                 </button>
 //               </div>
@@ -555,7 +555,7 @@
 //       </main>
 
 //       {/* Footer */}
-//       <footer className="bg-gray-900 text-gray-400 py-12 border-t border-gray-800">
+//       <footer className=" text-gray-400 py-12 border-t border-gray-800">
 //         <div className="container mx-auto px-4 sm:px-6 lg:px-8">
 //           <div className="grid md:grid-cols-4 gap-8">
 //             <div>
@@ -640,7 +640,7 @@
 //           <motion.div
 //             initial={{ opacity: 0, scale: 0.9 }}
 //             animate={{ opacity: 1, scale: 1 }}
-//             className="bg-gray-800 rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative border border-gray-700"
+//             className=" rounded-xl shadow-2xl p-8 max-w-md w-full mx-4 relative border border-gray-700"
 //           >
 //             <button 
 //               className="absolute top-4 right-4 text-gray-400 hover:text-gray-200"
@@ -746,7 +746,7 @@
 //                   <div className="w-full border-t border-gray-700"></div>
 //                 </div>
 //                 <div className="relative flex justify-center text-sm">
-//                   <span className="px-2 bg-gray-800 text-gray-400">Or continue with</span>
+//                   <span className="px-2  text-gray-400">Or continue with</span>
 //                 </div>
 //               </div>
               

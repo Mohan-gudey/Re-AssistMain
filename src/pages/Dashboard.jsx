@@ -200,7 +200,7 @@
 //       {/* Main Content Area */}
 //       <div className="flex flex-1 overflow-hidden">
 //         {/* Left Panel - Projects */}
-//         <div className="w-1/4 p-4 border-r border-indigo-900 flex flex-col overflow-hidden bg-gray-900">
+//         <div className="w-1/4 p-4 border-r border-indigo-900 flex flex-col overflow-hidden ">
 //           <div className="flex-1 overflow-y-auto mb-4">
 //             <button
 //               className="w-full bg-gradient-to-r from-indigo-500 to-purple-600 text-white py-2 rounded-md font-semibold hover:from-indigo-600 hover:to-purple-700 transition-all mb-4"
@@ -212,7 +212,7 @@
 //             {showInput && (
 //               <div className="mt-2 mb-4">
 //                 <input
-//                   className="w-full bg-gray-800 text-white rounded-md p-2 mb-2 border border-indigo-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
+//                   className="w-full  text-white rounded-md p-2 mb-2 border border-indigo-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 outline-none"
 //                   placeholder="Enter project name"
 //                   value={projectName}
 //                   onChange={(e) => setProjectName(e.target.value)}
@@ -235,7 +235,7 @@
 //                   {projects.map((project, index) => (
 //                     <li
 //                       key={index}
-//                       className={`bg-gray-800 p-2 rounded-md cursor-pointer hover:bg-gray-700 transition-colors ${
+//                       className={` p-2 rounded-md cursor-pointer hover:bg-gray-700 transition-colors ${
 //                         selectedProjectIndex === index
 //                           ? "border-l-4 border-indigo-500 pl-1"
 //                           : "pl-2"
@@ -303,12 +303,12 @@
 //                     </label>
 //                   </div>
 //                   <input
-//                     className="w-full bg-gray-800 text-white p-2 rounded-md mb-2 border border-indigo-800 focus:border-indigo-500 focus:outline-none"
+//                     className="w-full  text-white p-2 rounded-md mb-2 border border-indigo-800 focus:border-indigo-500 focus:outline-none"
 //                     placeholder="Search paper"
 //                     value={searchQuery}
 //                     onChange={(e) => setSearchQuery(e.target.value)}
 //                   />
-//                   <ul className="space-y-1 max-h-40 overflow-y-auto text-sm bg-gray-800 rounded-md p-1">
+//                   <ul className="space-y-1 max-h-40 overflow-y-auto text-sm  rounded-md p-1">
 //                     {filteredPapers.map((paper, idx) => (
 //                       <li
 //                         key={idx}
@@ -333,7 +333,7 @@
 //                   </div>
 //                   <div className="flex gap-2 mb-4">
 //                     <input
-//                       className="flex-1 bg-gray-800 text-white rounded-md p-2 border border-indigo-800 focus:border-indigo-500 focus:outline-none"
+//                       className="flex-1  text-white rounded-md p-2 border border-indigo-800 focus:border-indigo-500 focus:outline-none"
 //                       placeholder="https://arxiv.org/abs/xxx"
 //                       value={paperUrl}
 //                       onChange={(e) => setPaperUrl(e.target.value)}
@@ -383,7 +383,7 @@
 
 //           {/* Logout button at bottom */}
 //           <button 
-//             className="bg-gray-800 hover:bg-gray-700 text-white px-4 py-2 rounded-md mt-4 transition-colors"
+//             className=" hover:bg-gray-700 text-white px-4 py-2 rounded-md mt-4 transition-colors"
 //             onClick={handleLogout}
 //           >
 //             Logout
@@ -391,16 +391,16 @@
 //         </div>
 
 //         {/* Middle Content */}
-//         <div className="flex-1 flex flex-col overflow-hidden bg-gray-900">
+//         <div className="flex-1 flex flex-col overflow-hidden ">
 //           {activeTab === "Chats" ? (
 //             <div className="flex-1 flex flex-col p-4 overflow-hidden">
 //               <div className="flex-1 overflow-y-auto">
 //                 {activePaper ? (
-//                   <div className="bg-gray-800 rounded-md p-4">
+//                   <div className=" rounded-md p-4">
 //                     <h2 className="text-xl font-semibold text-indigo-300 mb-3">{activePaper.name}</h2>
 //                     <div className="text-sm text-gray-300">
 //                       <p>From project: {projects[activePaper.projectIndex].name}</p>
-//                       <div className="mt-4 p-3 bg-gray-900 rounded-md">
+//                       <div className="mt-4 p-3  rounded-md">
 //                         <p className="text-gray-400 mb-2">Paper content would display here</p>
 //                         <p className="text-xs text-gray-500">This is a simulated view of the paper content. 
 //                         In a real application, the paper would be rendered here.</p>
@@ -425,7 +425,7 @@
 //               <div className="border-t border-indigo-900 pt-4">
 //                 <div className="flex gap-2">
 //                   <input
-//                     className="flex-1 bg-gray-800 text-white p-2 rounded-md border border-indigo-800 focus:border-indigo-600 focus:outline-none"
+//                     className="flex-1  text-white p-2 rounded-md border border-indigo-800 focus:border-indigo-600 focus:outline-none"
 //                     placeholder="Type a message"
 //                     value={message}
 //                     onChange={(e) => setMessage(e.target.value)}
@@ -449,12 +449,12 @@
 //                     <input type="checkbox" defaultChecked className="text-indigo-600 focus:ring-indigo-500" />
 //                   </div>
 //                   <div className="flex items-center gap-2">
-//                     <select className="bg-gray-800 text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
+//                     <select className=" text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
 //                       <option>simple</option>
 //                       <option>detailed</option>
 //                       <option>comprehensive</option>
 //                     </select>
-//                     <select className="bg-gray-800 text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
+//                     <select className=" text-white p-1 rounded-md text-sm border border-indigo-800 focus:border-indigo-500 focus:outline-none">
 //                       <option>IEEE</option>
 //                       <option>APA</option>
 //                       <option>MLA</option>
@@ -473,8 +473,8 @@
 //                 </button>
 //               </div>
               
-//               <div className="bg-gray-800 rounded-md p-3">
-//                 <div className="flex justify-between text-sm font-semibold border-b border-gray-700 pb-2 mb-2 sticky top-0 bg-gray-800">
+//               <div className=" rounded-md p-3">
+//                 <div className="flex justify-between text-sm font-semibold border-b border-gray-700 pb-2 mb-2 sticky top-0 ">
 //                   <div className="w-1/2">Name</div>
 //                   <div className="w-1/4">Type</div>
 //                   <div className="w-1/4">Modified</div>
@@ -499,13 +499,13 @@
 //               </div>
               
 //               <input
-//                 className="w-full bg-gray-800 text-white p-2 rounded-md mb-4 border border-indigo-800 focus:border-indigo-500 focus:outline-none"
+//                 className="w-full  text-white p-2 rounded-md mb-4 border border-indigo-800 focus:border-indigo-500 focus:outline-none"
 //                 placeholder="Search grants..."
 //               />
               
 //               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //                 {grants.map((grant, index) => (
-//                   <div key={index} className="bg-gray-800 p-4 rounded-md">
+//                   <div key={index} className=" p-4 rounded-md">
 //                     <div className="font-semibold text-lg text-indigo-300">{grant.title}</div>
 //                     <div className="flex justify-between mt-3">
 //                       <div className="text-gray-400">Deadline: {grant.deadline}</div>
@@ -526,7 +526,7 @@
               
 //               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
 //                 {conferences.map((conf, index) => (
-//                   <div key={index} className="bg-gray-800 p-4 rounded-md">
+//                   <div key={index} className=" p-4 rounded-md">
 //                     <div className="font-semibold text-lg text-indigo-300">{conf.name}</div>
 //                     <div className="text-gray-400 mt-2">{conf.date}</div>
 //                     <div className="text-indigo-400 mt-1">{conf.location}</div>
@@ -539,7 +539,7 @@
 //               <h2 className="text-xl font-semibold mb-4 text-indigo-300">Help Center</h2>
               
 //               <div className="space-y-4">
-//                 <div className="bg-gray-800 p-4 rounded-md">
+//                 <div className=" p-4 rounded-md">
 //                   <h3 className="font-semibold mb-2 text-indigo-300">Quick Start Guide</h3>
 //                   <ul className="list-disc pl-5 space-y-1 text-gray-300">
 //                     <li>Create a new project using the "+ New Project" button</li>
@@ -549,7 +549,7 @@
 //                   </ul>
 //                 </div>
                 
-//                 <div className="bg-gray-800 p-4 rounded-md">
+//                 <div className=" p-4 rounded-md">
 //                   <h3 className="font-semibold mb-2 text-indigo-300">Frequently Asked Questions</h3>
 //                   <div className="space-y-3 text-gray-300">
 //                     <div>
@@ -572,7 +572,7 @@
 //         </div>
 
 //         {/* Right Panel - Information */}
-//         <div className="w-1/4 p-4 border-l border-indigo-900 flex flex-col overflow-hidden bg-gray-900">
+//         <div className="w-1/4 p-4 border-l border-indigo-900 flex flex-col overflow-hidden ">
 //           <div className="flex justify-between items-center mb-3">
 //             <div className="font-semibold text-indigo-300">Information panel</div>
 //             <button className="text-white text-sm bg-gray-700 p-1 rounded">⛶</button>
@@ -581,7 +581,7 @@
 //           <div className="flex-1 overflow-y-auto space-y-4 pr-1">
 //             {selectedProjectIndex !== null && (
 //               <>
-//                 <div className="bg-gray-800 p-3 rounded-md">
+//                 <div className=" p-3 rounded-md">
 //                   <h3 className="font-semibold text-sm mb-2 text-indigo-300">Project Summary</h3>
 //                   <p className="text-sm">{projects[selectedProjectIndex].name}</p>
 //                   <p className="text-xs text-indigo-400 mt-1">
@@ -590,7 +590,7 @@
 //                 </div>
                 
 //                 {projects[selectedProjectIndex].papers.length > 0 && (
-//                   <div className="bg-gray-800 p-3 rounded-md">
+//                   <div className=" p-3 rounded-md">
 //                     <h3 className="font-semibold text-sm mb-2 text-indigo-300">Recent Papers</h3>
 //                     <ul className="space-y-1 text-xs max-h-32 overflow-y-auto">
 //                       {projects[selectedProjectIndex].papers.slice(0, 3).map((paper, idx) => (
@@ -608,7 +608,7 @@
 //               </>
 //             )}
             
-//             <div className="bg-gray-800 p-3 rounded-md">
+//             <div className=" p-3 rounded-md">
 //               <h3 className="font-semibold text-sm mb-2 text-indigo-300">Quick Tips</h3>
 //               <ul className="text-xs space-y-2 text-gray-300">
 //                 <li>• Use specific questions to get better answers about your papers</li>
@@ -618,7 +618,7 @@
 //             </div>
 
 //             {activePaper && (
-//               <div className="bg-gray-800 p-3 rounded-md">
+//               <div className=" p-3 rounded-md">
 //                 <h3 className="font-semibold text-sm mb-2 text-indigo-300">Paper Details</h3>
 //                 <div className="text-xs text-gray-300">
 //                   <p className="mb-1"><span className="text-indigo-400">Title:</span> {activePaper.name}</p>
