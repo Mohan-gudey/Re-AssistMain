@@ -1991,7 +1991,7 @@ export default function ChatsComponent() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/api/projects", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name: projectName }),
@@ -2017,7 +2017,7 @@ export default function ChatsComponent() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch("http://localhost:5000/api/projects");
+        const response = await fetch("https://re-assist-backend.onrender.com/api/projects");
         if (!response.ok) {
           throw new Error("Failed to fetch projects");
         }
@@ -2048,7 +2048,7 @@ export default function ChatsComponent() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/api/papers/upload", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2168,7 +2168,7 @@ export default function ChatsComponent() {
         formData.append("files", file);
       });
 
-      const response = await fetch("http://localhost:5000/api/papers/upload", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
         body: formData,
       });
@@ -2180,7 +2180,7 @@ export default function ChatsComponent() {
 
       const projectId = projects[selectedProjectIndex]._id;
       for (const paper of result.papers) {
-        await fetch(`http://localhost:5000/api/projects/${projectId}/add-paper`, {
+        await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
           method: "PUT",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ paperId: paper._id }),
