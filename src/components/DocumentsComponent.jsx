@@ -338,15 +338,16 @@
 
 
 // File: src/components/DocumentsComponent.js
-import React, { useState } from "react";
+import React, { useState ,useEffect} from "react";
 import { useNavigate } from "react-router-dom";
+import axios from 'axios';
 import Sidebar from "./Sidebar";
 
 export default function DocumentsComponent() {
   const navigate = useNavigate();
   const [showNewDocModal, setShowNewDocModal] = useState(false);
   const [newDocName, setNewDocName] = useState("");
-    const [showProfileOptions, setShowProfileOptions] = useState(false);
+  const [showProfileOptions, setShowProfileOptions] = useState(false);
   const [newDocType, setNewDocType] = useState("Document");
   const [documents, setDocuments] = useState([
     { id: 1, name: "Research Proposal Template", type: "Template", lastModified: "April 2, 2025" },
@@ -357,6 +358,39 @@ export default function DocumentsComponent() {
   const [activeCategory, setActiveCategory] = useState("All Documents");
   const categories = ["All Documents", "Research Papers", "Notes", "Templates", "Guides"];
   
+  const [filteredDocuments, setFilteredDocuments] = useState([]);
+  const [papers, setPapers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+
+  useEffect(() => {
+    // Fetch papers when the component mounts
+    axios.get('https://re-assist-backend.onrender.com/api/projects')
+      .then((response) => {
+        const projects = response.data.projects;
+
+        // Flatten the papers array
+        const allPapers = projects.flatMap(project => project.papers);
+        setPapers(allPapers);
+        setFilteredDocuments(allPapers); // Initially set to all papers
+        setLoading(false);
+      })
+      .catch((err) => {
+        setError('Error fetching papers');
+        setLoading(false);
+        console.error('Error fetching papers:', err);
+      });
+  }, []);
+
+  useEffect(() => {
+    const filteredDocs = activeCategory === "All Documents"
+      ? papers
+      : papers.filter(doc => doc.type === activeCategory.slice(0, -1).trim());
+
+    setFilteredDocuments(filteredDocs);
+  }, [activeCategory, papers]);
+
+
   // New state for showing document viewer and editing
   const [selectedDocument, setSelectedDocument] = useState(null);
   const [showDocViewer, setShowDocViewer] = useState(false);
@@ -444,10 +478,6 @@ export default function DocumentsComponent() {
   const handleCancelEdit = () => {
     setIsEditing(false);
   };
-
-  const filteredDocuments = activeCategory === "All Documents" 
-    ? documents 
-    : documents.filter(doc => doc.type === activeCategory.slice(0, -1).trim());
 
   return (
     <div className="flex flex-col h-screen bg-gray-50 text-gray-800 font-sans overflow-hidden">
@@ -562,16 +592,22 @@ export default function DocumentsComponent() {
               filteredDocuments.map((doc, index) => (
                 <div 
                   key={index} 
-                  className="flex justify-between text-sm py-2 hover:bg-gray-100 rounded px-1 transition-colors cursor-pointer"
-                  onClick={() => handleOpenDocument(doc)}
+                  className="flex justify-between text-sm py-2 hover:bg-gray-200 rounded px-1 transition-colors cursor-pointer"
                 >
-                  <div className="w-1/2 truncate">{doc.name}</div>
-                  <div className="w-1/4 text-blue-700">{doc.type}</div>
-                  <div className="w-1/4 text-gray-500">{doc.lastModified}</div>
+                  <div className="w-1/2 truncate">{doc.title}</div>
+                  <div className="w-1/4 text-indigo-600">
+                    {/* Check if filePath exists and is a valid string */}
+                    {doc.filePath ? doc.filePath.split('.').pop().toUpperCase() : "Unknown Type"}
+                  </div>
+                  <div className="w-1/4 text-gray-500">
+                    {new Date(doc.uploadedAt).toLocaleString()} {/* Format uploaded date */}
+                  </div>
+                  {/* Optionally, you can add a download link for the paper */}
+                  <a href={doc.filePath} className="text-blue-500" target="_blank" rel="noopener noreferrer">Download</a>
                 </div>
               ))
             ) : (
-              <div className="text-center py-4 text-gray-500 text-sm">
+              <div className="text-center py-4 text-gray-400 text-sm">
                 No documents found in this category.
               </div>
             )}

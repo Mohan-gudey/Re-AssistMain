@@ -439,78 +439,149 @@ const AuthComponent = ({ initialForm = 'signin', onClose }) => {
   };
 
   // Handle sign-in submission
-  const handleSignIn = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
+  // const handleSignIn = async (e) => {
+  //   e.preventDefault();
+  //   setLoading(true);
+  //   setError('');
 
-    try {
-      const userCredential = await signInWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
+  //   try {
+  //     const userCredential = await signInWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
 
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('role', 'user');
-      localStorage.setItem('userEmail', user.email);
+  //     localStorage.setItem('isAuthenticated', 'true');
+  //     localStorage.setItem('role', 'user');
+  //     localStorage.setItem('userEmail', user.email);
 
-      if (onClose) {
-        onClose(); // Close the modal first
-      }
+  //     if (onClose) {
+  //       onClose(); // Close the modal first
+  //     }
+  //     navigate('/dashboard');
+  //   } catch (err) {
+  //     if (err.code === 'auth/user-not-found') {
+  //       setError('No user found with this email.');
+  //     } else if (err.code === 'auth/wrong-password') {
+  //       setError('Incorrect password.');
+  //     } else {
+  //       setError(err.message || 'Login failed. Please try again.');
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+  // // Handle sign-up submission
+  // const handleSignUp = async (e) => {
+  //   e.preventDefault();
+  //   setError('');
+  
+  //   if (password !== confirmPassword) {
+  //     setError('Passwords do not match');
+  //     return;
+  //   }
+  
+  //   setLoading(true);
+  //   try {
+  //     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+  //     const user = userCredential.user;
+  
+  //     // Send email verification
+  //     await sendEmailVerification(user);
+  
+  //     // Optionally store user info
+  //     localStorage.setItem('isAuthenticated', 'true');
+  //     localStorage.setItem('userEmail', user.email);
+  
+  //     alert('Verification email sent! Please check your inbox.');
+  //     setActiveForm('signin');
+  //   } catch (err) {
+  //     switch (err.code) {
+  //       case 'auth/email-already-in-use':
+  //         setError('This email is already registered.');
+  //         break;
+  //       case 'auth/invalid-email':
+  //         setError('Invalid email address.');
+  //         break;
+  //       case 'auth/weak-password':
+  //         setError('Password should be at least 6 characters.');
+  //         break;
+  //       default:
+  //         setError('Something went wrong. Please try again.');
+  //     }
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+
+
+  // Handle sign-in submission
+const handleSignIn = async (e) => {
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  try {
+    const userCredential = await signInWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Send Firebase user data to backend
+    const response = await fetch('https://re-assist-backend.onrender.com/api/users/login', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firebaseId: user.uid,
+        email: user.email,
+      }),
+    });
+
+    if (response.ok) {
+      const data = await response.json();
+      localStorage.setItem('token', data.token);
       navigate('/dashboard');
-    } catch (err) {
-      if (err.code === 'auth/user-not-found') {
-        setError('No user found with this email.');
-      } else if (err.code === 'auth/wrong-password') {
-        setError('Incorrect password.');
-      } else {
-        setError(err.message || 'Login failed. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+    } else {
+      setError('Failed to sync user data with backend.');
     }
-  };
+  } catch (err) {
+    setError(err.message || 'Login failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
-  // Handle sign-up submission
-  const handleSignUp = async (e) => {
-    e.preventDefault();
-    setError('');
-  
-    if (password !== confirmPassword) {
-      setError('Passwords do not match');
-      return;
-    }
-  
-    setLoading(true);
-    try {
-      const userCredential = await createUserWithEmailAndPassword(auth, email, password);
-      const user = userCredential.user;
-  
-      // Send email verification
-      await sendEmailVerification(user);
-  
-      // Optionally store user info
-      localStorage.setItem('isAuthenticated', 'true');
-      localStorage.setItem('userEmail', user.email);
-  
+// Handle sign-up submission
+const handleSignUp = async (e) => {
+  e.preventDefault();
+  setError('');
+  if (password !== confirmPassword) {
+    setError('Passwords do not match');
+    return;
+  }
+  setLoading(true);
+  try {
+    const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+    const user = userCredential.user;
+
+    // Send Firebase user data to backend
+    const response = await fetch('https://re-assist-backend.onrender.com/api/users/register', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        firebaseId: user.uid,
+        name: 'New User', // Replace with actual name input
+        email: user.email,
+      }),
+    });
+
+    if (response.ok) {
       alert('Verification email sent! Please check your inbox.');
       setActiveForm('signin');
-    } catch (err) {
-      switch (err.code) {
-        case 'auth/email-already-in-use':
-          setError('This email is already registered.');
-          break;
-        case 'auth/invalid-email':
-          setError('Invalid email address.');
-          break;
-        case 'auth/weak-password':
-          setError('Password should be at least 6 characters.');
-          break;
-        default:
-          setError('Something went wrong. Please try again.');
-      }
-    } finally {
-      setLoading(false);
+    } else {
+      setError('Failed to sync user data with backend.');
     }
-  };
+  } catch (err) {
+    setError(err.message || 'Sign-up failed. Please try again.');
+  } finally {
+    setLoading(false);
+  }
+};
 
   // Handle social login (Google)
   const handleSocialLogin = async () => {
