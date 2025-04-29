@@ -558,6 +558,7 @@ const handleSignUp = async (e) => {
   try {
     const userCredential = await createUserWithEmailAndPassword(auth, email, password);
     const user = userCredential.user;
+    console.log(userCredential)
 
     // Send Firebase user data to backend
     const response = await fetch('https://re-assist-backend.onrender.com/api/users/register', {
@@ -567,6 +568,7 @@ const handleSignUp = async (e) => {
         firebaseId: user.uid,
         name: 'New User', // Replace with actual name input
         email: user.email,
+        password: password,
       }),
     });
 

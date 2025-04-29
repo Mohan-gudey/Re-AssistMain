@@ -363,30 +363,74 @@ export default function DocumentsComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
+  // useEffect(() => {
+  //   // Fetch papers when the component mounts
+  //   axios.get('https://re-assist-backend.onrender.com/api/projects')
+  //     .then((response) => {
+  //       const projects = response.data.projects;
+
+  //       // Flatten the papers array
+  //       const allPapers = projects.flatMap(project => project.papers);
+  //       setPapers(allPapers);
+  //       setFilteredDocuments(allPapers); // Initially set to all papers
+  //       setLoading(false);
+  //     })
+  //     .catch((err) => {
+  //       setError('Error fetching papers');
+  //       setLoading(false);
+  //       console.error('Error fetching papers:', err);
+  //     });
+  // }, []);
+
   useEffect(() => {
     // Fetch papers when the component mounts
-    axios.get('https://re-assist-backend.onrender.com/api/projects')
-      .then((response) => {
+    const fetchPapers = async () => {
+      try {
+        const token = localStorage.getItem('token'); // Get the JWT token
+  
+        const response = await axios.get('https://re-assist-backend.onrender.com/api/projects', {
+          headers: {
+            Authorization: `Bearer ${token}`, // Include the token
+          },
+        });
+  
         const projects = response.data.projects;
-
-        // Flatten the papers array
-        const allPapers = projects.flatMap(project => project.papers);
+        console.log("projects data",projects)
+        // Normalize the data to ensure consistency
+        const normalizedProjects = projects.map((project) => ({
+          ...project,
+          papers: project.papers || [], // Ensure papers is always an array
+        }));
+  
+        // Flatten the papers array across all projects
+        const allPapers = normalizedProjects.flatMap((project) =>
+          project.papers.map((paper) => ({
+            ...paper,
+            projectId: project._id, // Include the project ID for reference
+          }))
+        );
+  
         setPapers(allPapers);
+        console.log("projects data",allPapers)
         setFilteredDocuments(allPapers); // Initially set to all papers
         setLoading(false);
-      })
-      .catch((err) => {
+      } catch (error) {
         setError('Error fetching papers');
         setLoading(false);
-        console.error('Error fetching papers:', err);
-      });
+        console.error('Error fetching papers:', error);
+      }
+    };
+  
+    fetchPapers();
   }, []);
-
+  
   useEffect(() => {
-    const filteredDocs = activeCategory === "All Documents"
-      ? papers
-      : papers.filter(doc => doc.type === activeCategory.slice(0, -1).trim());
-
+    // Filter documents based on the active category
+    const filteredDocs =
+      activeCategory === "All Documents"
+        ? papers
+        : papers.filter((doc) => doc.type === activeCategory.slice(0, -1).trim());
+  
     setFilteredDocuments(filteredDocs);
   }, [activeCategory, papers]);
 
@@ -582,36 +626,46 @@ export default function DocumentsComponent() {
           </div>
           
           <div className="bg-white rounded-md shadow-sm p-3">
-            <div className="flex justify-between text-sm font-semibold border-b border-gray-200 pb-2 mb-2 sticky top-0 bg-white">
-              <div className="w-1/2">Name</div>
-              <div className="w-1/4">Type</div>
-              <div className="w-1/4">Modified</div>
-            </div>
-            
-            {filteredDocuments.length > 0 ? (
-              filteredDocuments.map((doc, index) => (
-                <div 
-                  key={index} 
-                  className="flex justify-between text-sm py-2 hover:bg-gray-200 rounded px-1 transition-colors cursor-pointer"
-                >
-                  <div className="w-1/2 truncate">{doc.title}</div>
-                  <div className="w-1/4 text-indigo-600">
-                    {/* Check if filePath exists and is a valid string */}
-                    {doc.filePath ? doc.filePath.split('.').pop().toUpperCase() : "Unknown Type"}
-                  </div>
-                  <div className="w-1/4 text-gray-500">
-                    {new Date(doc.uploadedAt).toLocaleString()} {/* Format uploaded date */}
-                  </div>
-                  {/* Optionally, you can add a download link for the paper */}
-                  <a href={doc.filePath} className="text-blue-500" target="_blank" rel="noopener noreferrer">Download</a>
-                </div>
-              ))
-            ) : (
-              <div className="text-center py-4 text-gray-400 text-sm">
-                No documents found in this category.
-              </div>
-            )}
+          {/* Header */}
+          <div className="grid grid-cols-4 text-sm font-semibold border-b border-gray-200 pb-2 mb-2 sticky top-0 bg-white">
+            <div>Name</div>
+            <div>Type</div>
+            <div>Modified</div>
+            <div>Action</div>
           </div>
+
+          {/* Rows */}
+          {filteredDocuments.length > 0 ? (
+            filteredDocuments.map((doc, index) => (
+              <div
+                key={index}
+                className="grid grid-cols-4 text-sm py-2 px-1 hover:bg-gray-100 rounded transition-colors cursor-pointer items-center"
+              >
+                <div className="truncate">{doc.title}</div>
+                <div className="text-indigo-600">
+                  {doc.url ? doc.url.split('.').pop().toUpperCase() : "Unknown"}
+                </div>
+                <div className="text-gray-500">
+                  {new Date(doc.uploadedAt).toLocaleString()}
+                </div>
+                <div>
+                  <a
+                    href={doc.url}
+                    className="text-blue-500 hover:underline"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                  >
+                    Download
+                  </a>
+                </div>
+              </div>
+            ))
+          ) : (
+            <div className="text-center py-4 text-gray-400 text-sm">
+              No documents found in this category.
+            </div>
+          )}
+        </div>
         </div>
       </div>
 

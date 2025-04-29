@@ -1985,15 +1985,20 @@ export default function ChatsComponent() {
     setShowPaperOptions(false);
   };
 
+
   const handleSaveProject = async () => {
     if (!projectName.trim()) {
       alert("Please enter a valid project name.");
       return;
     }
     try {
+      const token = localStorage.getItem('token');
       const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
         body: JSON.stringify({ name: projectName }),
       });
       if (!response.ok) {
@@ -2001,7 +2006,6 @@ export default function ChatsComponent() {
         throw new Error(errorData || "Failed to save project");
       }
       const result = await response.json();
-      console.log("Project saved successfully:", result);
       setProjects((prev) => [
         ...prev,
         { name: projectName, _id: result.project._id, papers: [] },
@@ -2014,31 +2018,38 @@ export default function ChatsComponent() {
     }
   };
 
+
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const response = await fetch("https://re-assist-backend.onrender.com/api/projects");
+        const token = localStorage.getItem('token'); // Get the JWT token
+        const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        });
+  
         if (!response.ok) {
           throw new Error("Failed to fetch projects");
         }
+  
         const result = await response.json();
-        console.log("Fetched projects:", result);
-
+        console.log("Fetched projects:", result.projects); // Log the response
+  
         // Normalize the data to match frontend expectations
         const normalizedProjects = result.projects.map((project) => ({
           ...project,
-          papers: project.papers.map((paper) => ({
-            title: paper.title || "Untitled Paper",
-            url: paper.filePath || "",
-            id: paper._id,
-          })),
+          papers: project.papers || [], // Ensure papers is always an array
         }));
+  
         setProjects(normalizedProjects);
       } catch (error) {
         console.error("Error fetching projects:", error);
         alert(`Error: ${error.message}`);
       }
     };
+  
     fetchProjects();
   }, []);
 
@@ -2152,41 +2163,53 @@ export default function ChatsComponent() {
     }
   };
 
+
   const handleUploadFiles = async () => {
     if (selectedProjectIndex === null) {
       alert("Please select a project first.");
       return;
     }
+  
     const filesToUpload = [...droppedFiles, ...selectedFiles];
     if (filesToUpload.length === 0) {
       alert("No files to upload.");
       return;
     }
+  
     try {
       const formData = new FormData();
       filesToUpload.forEach((file) => {
-        formData.append("files", file);
+        formData.append("files", file); // Append each file to the form data
       });
-
+  
+      const token = localStorage.getItem('token'); // Get the JWT token
       const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
+        headers: {
+          Authorization: `Bearer ${token}`, // Include the token
+        },
         body: formData,
       });
+  
       if (!response.ok) {
-        const errorData = await response.text();
-        throw new Error(errorData || "Failed to upload files");
+        const errorData = await response.json();
+        throw new Error(errorData.message || "Failed to upload files");
       }
+  
       const result = await response.json();
-
+  
       const projectId = projects[selectedProjectIndex]._id;
       for (const paper of result.papers) {
         await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
           method: "PUT",
-          headers: { "Content-Type": "application/json" },
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
           body: JSON.stringify({ paperId: paper._id }),
         });
       }
-
+  
       const updatedProjects = [...projects];
       filesToUpload.forEach((file) => {
         updatedProjects[selectedProjectIndex].papers.push({
@@ -2195,6 +2218,7 @@ export default function ChatsComponent() {
           id: null,
         });
       });
+  
       setProjects(updatedProjects);
       setDroppedFiles([]);
       setSelectedFiles([]);
