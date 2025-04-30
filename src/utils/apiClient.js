@@ -1,22 +1,20 @@
-import { getAuthHeaders } from './authUtils';
+import axios from 'axios';
 
-export const apiClient = async (url, options = {}) => {
-  try {
-    const headers = {
-      ...options.headers,
-      ...getAuthHeaders(),
-    };
+// Create an Axios instance with a base URL
+const apiClient = axios.create({
+  baseURL: 'https://re-assist-backend.onrender.com', // Replace with your backend API URL
+  timeout: 5000, // Optional: Set a timeout for requests
+});
 
-    const response = await fetch(url, { ...options, headers });
-
-    if (!response.ok) {
-      const errorData = await response.json();
-      throw new Error(errorData.message || "Request failed");
-    }
-
-    return response.json();
-  } catch (error) {
-    console.error("API Error:", error);
-    throw error; // Re-throw for handling in components
+// Add an interceptor to include the token in the headers
+apiClient.interceptors.request.use((config) => {
+  const token = localStorage.getItem('token'); // Retrieve the token from localStorage
+  if (token) {
+    config.headers['Authorization'] = `Bearer ${token}`; // Add the token to the Authorization header
   }
-};
+  return config;
+}, (error) => {
+  return Promise.reject(error);
+});
+
+export default apiClient;
