@@ -2853,8 +2853,13 @@ export default function ChatsComponent() {
                     <div className="space-y-5 overflow-y-scroll max-h-[60vh] mt-2">
                     
                     {papers.map((paper, index) => (
-                      <div key={index} className="bg-white shadow-md rounded-lg p-6 ">
-                        <h2 className="text-xl font-semibold text-gray-800">{paper.title}</h2>
+                      <div key={index} className="bg-white shadow-md rounded-lg p-4 ">
+                        <a href={paper.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-gray-800 hover:text-blue-700 font-medium text-xl">
+                        {paper.title}
+                        </a>
                         <p className="text-sm text-gray-600 mt-2">
                           Authors: {paper.authors.join(", ") || "Unknown"}
                         </p>
@@ -2862,14 +2867,6 @@ export default function ChatsComponent() {
                           Published: {new Date(paper.publishedDate).toLocaleDateString()}
                         </p>
                         <p className="text-gray-700 text-sm mt-3">{paper.summary}</p>
-                        <a
-                          href={paper.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block mt-4 text-blue-500 hover:text-blue-700 font-medium text-sm"
-                        >
-                          {paper.title}
-                        </a>
                       </div>
                     ))}
                   </div>
