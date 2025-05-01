@@ -1987,6 +1987,9 @@ export default function ChatsComponent() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
   
+    
+
+
     useEffect(() => {
       const fetchData = async () => {
         if (selectedProjectIndex === null) return;
@@ -2364,6 +2367,21 @@ export default function ChatsComponent() {
     }
   };
 
+  const topics = [
+    'CV',
+    'LLM',
+    'Code Generation',
+    'Object Recognition',
+    'ML',
+    'Semantic Embeddings',
+    'Evaluation',
+  ];
+  
+  const getRandomTopics = (count = 2) => {
+    const shuffled = [...topics].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+  
   return (
     <div className="flex flex-col h-screen bg-white text-gray-800 font-sans overflow-hidden">
       {/* Main Header with Navigation Tabs */}
@@ -2454,6 +2472,7 @@ export default function ChatsComponent() {
                           >
                             {project.name}
                             </h2>
+                            
                           <button
                             className="text-gray-500 hover:text-red-500 transition-colors"
                             onClick={(e) => handleDeleteProject(e, project._id)}
@@ -2485,6 +2504,7 @@ export default function ChatsComponent() {
                                     : ""
                                 }`}
                               >
+                                <div className="flexflex-col justify-between">
                                 <span
                                 className="block mr-1 cursor-pointer whitespace-normal break-words"
                                 onClick={(e) => {
@@ -2494,7 +2514,12 @@ export default function ChatsComponent() {
                               >
                                 {paper.title || "Untitled Paper"}
                               </span>
-
+                              <div className="flex gap-2 text-xs text-blue-600 font-semibold">
+                                {getRandomTopics(Math.floor(Math.random() * 2) + 2).map((topic, i) => (
+                                  <span key={i}>{topic}</span>
+                                ))}
+                              </div>
+                              </div>
                                 <button
                                   className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
                                   onClick={(e) => {
