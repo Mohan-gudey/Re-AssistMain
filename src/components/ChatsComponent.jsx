@@ -2486,14 +2486,15 @@ export default function ChatsComponent() {
                                 }`}
                               >
                                 <span
-                                  className="truncate mr-1 ml-4"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handlePaperSelect(paper, index, idx);
-                                  }}
-                                >
-                                  {paper.title || "Untitled Paper"}
-                                </span>
+                                className="block ml-4 mr-1 cursor-pointer whitespace-normal break-words"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handlePaperSelect(paper, index, idx);
+                                }}
+                              >
+                                {paper.title || "Untitled Paper"}
+                              </span>
+
                                 <button
                                   className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
                                   onClick={(e) => {
