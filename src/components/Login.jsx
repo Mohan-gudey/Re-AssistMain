@@ -523,7 +523,7 @@ const handleSignIn = async (e) => {
     const user = userCredential.user;
 
     // Send Firebase user data to backend
-    const response = await fetch('https://re-assist-backend.onrender.com/api/users/login', {
+    const response = await fetch('http://13.203.204.249:5000/api/users/login', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
@@ -561,7 +561,7 @@ const handleSignUp = async (e) => {
     console.log(userCredential)
 
     // Send Firebase user data to backend
-    const response = await fetch('https://re-assist-backend.onrender.com/api/users/register', {
+    const response = await fetch('http://13.203.204.249:5000/api/users/register', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({

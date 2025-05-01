@@ -1989,15 +1989,15 @@ export default function ChatsComponent() {
   
     useEffect(() => {
       const fetchData = async () => {
+        if (selectedProjectIndex === null) return;
+  
         try {
           const response = await axios.get(
             "https://export.arxiv.org/api/query?search_query=ti:%22electron%20thermal%20conductivity%22&sortBy=lastUpdatedDate&sortOrder=ascending"
           );
-  
           // Parse the XML response
           const parser = new DOMParser();
           const xmlDoc = parser.parseFromString(response.data, "application/xml");
-  
           const entries = Array.from(xmlDoc.querySelectorAll("entry")).map((entry) => {
             const title = entry.querySelector("title")?.textContent.trim() || "No Title";
             const authors = Array.from(entry.querySelectorAll("author name")).map(
@@ -2006,10 +2006,8 @@ export default function ChatsComponent() {
             const publishedDate = entry.querySelector("published")?.textContent || "Unknown Date";
             const summary = entry.querySelector("summary")?.textContent.trim() || "No Abstract";
             const link = entry.querySelector("id")?.textContent || "#";
-  
             return { title, authors, publishedDate, summary, link };
           });
-  
           setPapers(entries);
           setLoading(false);
         } catch (err) {
@@ -2017,10 +2015,67 @@ export default function ChatsComponent() {
           setLoading(false);
         }
       };
-  
       fetchData();
-    }, []);
-   
+    }, [selectedProjectIndex]);
+  
+    // Add paper to the selected project and save it in the backend
+    const addPaperToProject = async (paper) => {
+      if (selectedProjectIndex === null) {
+        alert("Please select a project first.");
+        return;
+      }
+  
+      try {
+        const projectId = projects[selectedProjectIndex]._id;
+        const token = localStorage.getItem("token");
+  
+        // Save paper in the backend
+        const paperResponse = await fetch("http://13.203.204.249:5000/api/papers/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: paper.title,
+            url: paper.link,
+          }),
+        });
+  
+        const paperResult = await paperResponse.json();
+        if (!paperResponse.ok) {
+          throw new Error(paperResult.error || "Failed to save paper");
+        }
+  
+        // Add paper to the project in the backend
+        await fetch(`http://13.203.204.249:5000/api/projects/${projectId}/add-paper`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ paperId: paperResult.paper._id }),
+        });
+  
+        // Update frontend state
+        const updatedProjects = [...projects];
+        updatedProjects[selectedProjectIndex].papers.push({
+          title: paper.title,
+          url: paper.link,
+          id: paperResult.paper._id,
+        });
+        setProjects(updatedProjects);
+  
+        // Remove paper from Arxiv recommendations
+        setPapers((prevPapers) => prevPapers.filter((p) => p.link !== paper.link));
+  
+        alert("Paper added successfully!");
+      } catch (error) {
+        console.error("Error adding paper:", error);
+        alert(`Error: ${error.message}`);
+      }
+    };
+  
   // Project management functions
   const handleNewProjectClick = () => {
     setShowInput(true);
@@ -2036,7 +2091,7 @@ export default function ChatsComponent() {
     }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
+      const response = await fetch("http://13.203.204.249:5000/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2066,7 +2121,7 @@ export default function ChatsComponent() {
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token
-        const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
+        const response = await fetch("http://13.203.204.249:5000/api/projects", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -2102,7 +2157,7 @@ export default function ChatsComponent() {
       return;
     }
     try {
-      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
+      const response = await fetch("http://13.203.204.249:5000/api/papers/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2242,7 +2297,7 @@ export default function ChatsComponent() {
       });
   
       const token = localStorage.getItem('token'); // Get the JWT token
-      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
+      const response = await fetch("http://13.203.204.249:5000/api/papers/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`, // Include the token
@@ -2259,7 +2314,7 @@ export default function ChatsComponent() {
   
       const projectId = projects[selectedProjectIndex]._id;
       for (const paper of result.papers) {
-        await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
+        await fetch(`http://13.203.204.249:5000/api/projects/${projectId}/add-paper`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -2832,18 +2887,16 @@ export default function ChatsComponent() {
                     </div>
                   </div>
                 </div>
-                ) : selectedProjectIndex !== null ? (
+                ) :  selectedProjectIndex !== null && !activePaper ? (
                   <div className="max-w-4xl mx-auto">
                     <div className="text-center mt-8">
                       <h2 className="text-xl font-bold mb-3 bg-blue-50 py-2 px-4 rounded-md inline-block text-blue-700">
                         {projects[selectedProjectIndex].name}
                       </h2>
                       <p className="text-sm text-gray-600">{projects[selectedProjectIndex].papers.length} papers added</p>
-                      <p className="mt-3 text-sm text-gray-700">Ask me anything about your papers!</p>
-                      <p className="text-xs text-blue-600 mt-2">Click on a paper in the left panel to view its contents</p>
                     </div>
-                    
-                    {/* Paper recommendations section in the center */}
+  
+                    {/* Display Arxiv papers */}
                     <h3 className="text-blue-700 font-medium text-md mt-3 flex items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
@@ -2851,27 +2904,27 @@ export default function ChatsComponent() {
                       Recommended Papers
                     </h3>
                     <div className="space-y-5 overflow-y-scroll max-h-[60vh] mt-2">
-                    
-                    {papers.map((paper, index) => (
-                      <div key={index} className="bg-white shadow-md rounded-lg p-4 ">
-                        <a href={paper.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block text-gray-800 hover:text-blue-700 font-medium text-xl">
-                        {paper.title}
-                        </a>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Authors: {paper.authors.join(", ") || "Unknown"}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Published: {new Date(paper.publishedDate).toLocaleDateString()}
-                        </p>
-                        <p className="text-gray-700 text-sm mt-3">{paper.summary}</p>
-                      </div>
-                    ))}
+                      {papers.map((paper, index) => (
+                        <div key={index} className="bg-white shadow-md rounded-lg p-4">
+                          <h2 className="text-xl font-semibold text-gray-800">{paper.title}</h2>
+                          <p className="text-sm text-gray-600 mt-2">
+                            Authors: {paper.authors.join(", ") || "Unknown"}
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Published: {new Date(paper.publishedDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-gray-700 text-sm mt-3">{paper.summary}</p>
+                          <button
+                            onClick={() => addPaperToProject(paper)}
+                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                          >
+                            Add to Project
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  </div>
-                ) : (
+                ) :(
                   <div className="text-center mt-8">
                     <p className="text-sm text-gray-700">Welcome to Re-Assist.</p>
                     <p className="mt-2 text-sm text-gray-600">Select or create a project to get started.</p>

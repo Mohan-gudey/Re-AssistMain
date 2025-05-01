@@ -1960,6 +1960,7 @@ import Sidebar from "./Sidebar";
 import ResearchProfileComponent from "./ResearchProfileComponent";
 import apiClient from "../utils/apiClient";
 import ConfirmationModal from "./ConfirmationModal";
+import axios from "axios";
 export default function ChatsComponent() {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
@@ -1978,9 +1979,48 @@ export default function ChatsComponent() {
     "Recent paper: 'Scaling Vision Transformers to 22 Billion Parameters'",
     "Popular: 'Large Language Models Encode Clinical Knowledge'"
   ]);
-  const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
-  const [projectIdToDelete, setProjectIdToDelete] = useState(null);
 
+    const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
+    const [projectIdToDelete, setProjectIdToDelete] = useState(null);
+  
+    const [papers, setPapers] = useState([]);
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+  
+    useEffect(() => {
+      const fetchData = async () => {
+        try {
+          const response = await axios.get(
+            "https://export.arxiv.org/api/query?search_query=ti:%22electron%20thermal%20conductivity%22&sortBy=lastUpdatedDate&sortOrder=ascending"
+          );
+  
+          // Parse the XML response
+          const parser = new DOMParser();
+          const xmlDoc = parser.parseFromString(response.data, "application/xml");
+  
+          const entries = Array.from(xmlDoc.querySelectorAll("entry")).map((entry) => {
+            const title = entry.querySelector("title")?.textContent.trim() || "No Title";
+            const authors = Array.from(entry.querySelectorAll("author name")).map(
+              (author) => author.textContent
+            );
+            const publishedDate = entry.querySelector("published")?.textContent || "Unknown Date";
+            const summary = entry.querySelector("summary")?.textContent.trim() || "No Abstract";
+            const link = entry.querySelector("id")?.textContent || "#";
+  
+            return { title, authors, publishedDate, summary, link };
+          });
+  
+          setPapers(entries);
+          setLoading(false);
+        } catch (err) {
+          setError("Failed to fetch data from arXiv API.");
+          setLoading(false);
+        }
+      };
+  
+      fetchData();
+    }, []);
+   
   // Project management functions
   const handleNewProjectClick = () => {
     setShowInput(true);
@@ -2088,7 +2128,6 @@ export default function ChatsComponent() {
     updatedProjects[index].name = newName;
     setProjects(updatedProjects);
   };
-
   const handleDeleteProject = async (e, projectId) => {
     e.stopPropagation();
     setProjectIdToDelete(projectId); // Store the project ID to delete
@@ -2338,107 +2377,103 @@ export default function ChatsComponent() {
                     Saved Projects
                   </div>
                   <ul className="space-y-2">
-                  {projects.map((project, index) => (
-                    <li
-                      key={project._id} // Use project._id as the unique key
-                      className={`bg-white p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors ${
-                        selectedProjectIndex === project._id
-                          ? "border-l-4 border-blue-500 pl-1.5 shadow-md"
-                          : "pl-2"
-                      }`}
-                      onClick={() => handleProjectSelect(project._id)} // Pass project._id instead of index
-                    >
-                      <div className="flex justify-between items-center">
-                        <input
-                          value={project.name}
-                          onChange={(e) =>
-                            handleEditProjectName(project._id, e.target.value) // Pass project._id instead of index
-                          }
-                          className={`bg-transparent focus:outline-none ${
-                            selectedProjectIndex === project._id
-                              ? "text-blue-700 font-bold text-sm"
-                              : "text-gray-800 text-[0.8rem] font-bold"
-                          }`}
-                          onClick={(e) => e.stopPropagation()}
-                        />
-                        <button
-                          className="text-gray-500 hover:text-red-500 transition-colors"
-                          onClick={(e) => handleDeleteProject(e, project._id)} // Pass project._id instead of index
-                        >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                    {projects.map((project, index) => (
+                      <li
+                        key={project._id}
+                        className={`bg-white p-2 rounded-lg cursor-pointer hover:bg-gray-100 transition-colors ${
+                          selectedProjectIndex === index
+                            ? "border-l-4 border-blue-500 pl-1.5 shadow-md"
+                            : "pl-2"
+                        }`}
+                        onClick={() => handleProjectSelect(index)}
+                      >
+                        <div className="flex justify-between items-center">
+                          <h2
+                            className={`bg-transparent focus:outline-none ${
+                              selectedProjectIndex === index
+                                ? "text-blue-700 font-bold text-sm"
+                                : "text-gray-800 text-[0.8rem] font-bold"
+                            }`}
+                            onClick={(e) => e.stopPropagation()}
                           >
-                            <path
-                              fillRule="evenodd"
-                              d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                              clipRule="evenodd"
-                            />
-                          </svg>
-                        </button>
-                      </div>
-                      {project.papers.length > 0 && (
-                        <ul className="mt-1.5 text-xs text-gray-600 list-disc pl-4 max-h-24 overflow-y-auto">
-                          {project.papers.map((paper, idx) => (
-                            <li
-                              key={idx}
-                              className={`cursor-pointer hover:text-blue-700 py-0.5 flex justify-between items-center ${
-                                activePaper &&
-                                activePaper.projectId === project._id &&
-                                activePaper.paperIndex === idx
-                                  ? "text-blue-700 font-medium"
-                                  : ""
-                              }`}
+                            {project.name} 
+                            </h2>
+                          <button
+                            className="text-gray-500 hover:text-red-500 transition-colors"
+                            onClick={(e) => handleDeleteProject(e, project._id)}
+                          >
+                            <svg
+                              xmlns="http://www.w3.org/2000/svg"
+                              className="h-3 w-3"
+                              viewBox="0 0 20 20"
+                              fill="currentColor"
                             >
-                              <span
-                                className="truncate mr-1"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  handlePaperSelect(paper, project._id, idx); // Pass project._id instead of index
-                                }}
+                              <path
+                                fillRule="evenodd"
+                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                clipRule="evenodd"
+                              />
+                            </svg>
+                          </button>
+                        </div>
+                        {project.papers.length > 0 && (
+                          <ul className="mt-1.5 text-xs text-gray-600 list-disc pl-4 max-h-24 overflow-y-auto">
+                            <li className="text-[0.9rem] mb-1 ml-2">Trigonometry</li>
+                            {project.papers.map((paper, idx) => (
+                              <li
+                                key={idx}
+                                className={`cursor-pointer hover:text-blue-700 py-0.5 flex justify-between items-center ${
+                                  activePaper &&
+                                  activePaper.projectIndex === index &&
+                                  activePaper.paperIndex === idx
+                                    ? "text-blue-700 font-medium"
+                                    : ""
+                                }`}
                               >
-                                {paper.title || "Untitled Paper"}
-                              </span>
-                              <button
-                                className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  const updatedProjects = [...projects];
-                                  updatedProjects.find((p) => p._id === project._id).papers.splice(
-                                    idx,
-                                    1
-                                  );
-                                  setProjects(updatedProjects);
-                                  if (
-                                    activePaper &&
-                                    activePaper.projectId === project._id &&
-                                    activePaper.paperIndex === idx
-                                  ) {
-                                    setActivePaper(null);
-                                  }
-                                }}
-                              >
-                                <svg
-                                  xmlns="http://www.w3.org/2000/svg"
-                                  className="h-3 w-3"
-                                  viewBox="0 0 20 20"
-                                  fill="currentColor"
+                                <span
+                                  className="truncate mr-1 ml-4"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePaperSelect(paper, index, idx);
+                                  }}
                                 >
-                                  <path
-                                    fillRule="evenodd"
-                                    d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                    clipRule="evenodd"
-                                  />
-                                </svg>
-                              </button>
-                            </li>
-                          ))}
-                        </ul>
-                      )}
-                    </li>
-                  ))}
+                                  {paper.title || "Untitled Paper"}
+                                </span>
+                                <button
+                                  className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    const updatedProjects = [...projects];
+                                    updatedProjects[index].papers.splice(idx, 1);
+                                    setProjects(updatedProjects);
+                                    if (
+                                      activePaper &&
+                                      activePaper.projectIndex === index &&
+                                      activePaper.paperIndex === idx
+                                    ) {
+                                      setActivePaper(null);
+                                    }
+                                  }}
+                                >
+                                  <svg
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    className="h-3 w-3"
+                                    viewBox="0 0 20 20"
+                                    fill="currentColor"
+                                  >
+                                    <path
+                                      fillRule="evenodd"
+                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                                      clipRule="evenodd"
+                                    />
+                                  </svg>
+                                </button>
+                              </li>
+                            ))}
+                          </ul>
+                        )}
+                      </li>
+                    ))}
                   </ul>
                 </div>
               )}
@@ -2798,7 +2833,7 @@ export default function ChatsComponent() {
                   </div>
                 </div>
                 ) : selectedProjectIndex !== null ? (
-                  <div className="max-w-3xl mx-auto">
+                  <div className="max-w-4xl mx-auto">
                     <div className="text-center mt-8">
                       <h2 className="text-xl font-bold mb-3 bg-blue-50 py-2 px-4 rounded-md inline-block text-blue-700">
                         {projects[selectedProjectIndex].name}
@@ -2809,23 +2844,32 @@ export default function ChatsComponent() {
                     </div>
                     
                     {/* Paper recommendations section in the center */}
-                    {recommendations.length > 0 && (
-                      <div className="mt-8 bg-white rounded-lg p-4 shadow-md border border-blue-100">
-                        <h3 className="text-blue-700 font-medium text-sm mb-3 flex items-center gap-2">
-                          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                            <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                          </svg>
-                          Recommended Papers
-                        </h3>
-                        <ul className="space-y-2">
-                          {recommendations.map((rec, idx) => (
-                            <li key={idx} className="bg-gray-50 p-2 rounded text-sm hover:bg-blue-50 transition-colors cursor-pointer text-gray-700">
-                              {rec}
-                            </li>
-                          ))}
-                        </ul>
+                    <h3 className="text-blue-700 font-medium text-md mt-3 flex items-center gap-2">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                      </svg>
+                      Recommended Papers
+                    </h3>
+                    <div className="space-y-5 overflow-y-scroll max-h-[60vh] mt-2">
+                    
+                    {papers.map((paper, index) => (
+                      <div key={index} className="bg-white shadow-md rounded-lg p-4 ">
+                        <a href={paper.link}
+                          target="_blank"
+                          rel="noopener noreferrer"
+                          className="inline-block text-gray-800 hover:text-blue-700 font-medium text-xl">
+                        {paper.title}
+                        </a>
+                        <p className="text-sm text-gray-600 mt-2">
+                          Authors: {paper.authors.join(", ") || "Unknown"}
+                        </p>
+                        <p className="text-sm text-gray-500 mt-1">
+                          Published: {new Date(paper.publishedDate).toLocaleDateString()}
+                        </p>
+                        <p className="text-gray-700 text-sm mt-3">{paper.summary}</p>
                       </div>
-                    )}
+                    ))}
+                  </div>
                   </div>
                 ) : (
                   <div className="text-center mt-8">
