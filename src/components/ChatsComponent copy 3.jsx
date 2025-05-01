@@ -2779,10 +2779,10 @@ export default function ChatsComponent() {
                         {projects[activePaper.projectIndex]?.name || "Unknown Project"}
                       </span>
                     </p>
-                     {activePaper.url && (
+                    {activePaper.url && (
                       <p className="text-blue-600 underline break-all">
                         <a href={activePaper.url} target="_blank" rel="noopener noreferrer">
-                        {activePaper.url}
+                          {activePaper.url}
                         </a>
                       </p>
                     )}
