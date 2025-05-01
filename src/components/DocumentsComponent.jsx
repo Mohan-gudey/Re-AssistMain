@@ -365,7 +365,7 @@ export default function DocumentsComponent() {
 
   // useEffect(() => {
   //   // Fetch papers when the component mounts
-  //   axios.get('http://13.203.204.249:5000/api/projects')
+  //   axios.get('https://re-assist-backend.onrender.com/api/projects')
   //     .then((response) => {
   //       const projects = response.data.projects;
 
@@ -388,7 +388,7 @@ export default function DocumentsComponent() {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token
   
-        const response = await axios.get('http://13.203.204.249:5000/api/projects', {
+        const response = await axios.get('https://re-assist-backend.onrender.com/api/projects', {
           headers: {
             Authorization: `Bearer ${token}`, // Include the token
           },

@@ -282,7 +282,7 @@ export default function FeedbackForm({ isOpen, onClose }) {
     e.preventDefault();
   
     try {
-      const response = await axios.post("http://13.203.204.249:5000/api/feedback", {
+      const response = await axios.post("https://re-assist-backend.onrender.com/api/feedback", {
         type: feedbackType,
         rating,
         text: feedbackText

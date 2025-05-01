@@ -2030,7 +2030,7 @@ export default function ChatsComponent() {
         const token = localStorage.getItem("token");
   
         // Save paper in the backend
-        const paperResponse = await fetch("http://13.203.204.249:5000/api/papers/upload", {
+        const paperResponse = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -2048,7 +2048,7 @@ export default function ChatsComponent() {
         }
   
         // Add paper to the project in the backend
-        await fetch(`http://13.203.204.249:5000/api/projects/${projectId}/add-paper`, {
+        await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -2091,7 +2091,7 @@ export default function ChatsComponent() {
     }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("http://13.203.204.249:5000/api/projects", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -2121,7 +2121,7 @@ export default function ChatsComponent() {
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token
-        const response = await fetch("http://13.203.204.249:5000/api/projects", {
+        const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -2157,7 +2157,7 @@ export default function ChatsComponent() {
       return;
     }
     try {
-      const response = await fetch("http://13.203.204.249:5000/api/papers/upload", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -2297,7 +2297,7 @@ export default function ChatsComponent() {
       });
   
       const token = localStorage.getItem('token'); // Get the JWT token
-      const response = await fetch("http://13.203.204.249:5000/api/papers/upload", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`, // Include the token
@@ -2314,7 +2314,7 @@ export default function ChatsComponent() {
   
       const projectId = projects[selectedProjectIndex]._id;
       for (const paper of result.papers) {
-        await fetch(`http://13.203.204.249:5000/api/projects/${projectId}/add-paper`, {
+        await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
