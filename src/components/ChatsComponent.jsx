@@ -583,12 +583,18 @@ export default function ChatsComponent() {
                       >
                         <div className="flex justify-between items-center">
                           <h2
-                            className={`bg-transparent focus:outline-none ${
+                            className={`bg-transparent  focus:outline-none ${
                               selectedProjectIndex === index
                                 ? "text-blue-700 font-bold text-sm"
                                 : "text-gray-800 text-[0.8rem] font-bold"
                             }`}
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) =>{ e.stopPropagation();
+                              handleProjectSelect(index);
+                              setExpandedProjectIndex(
+                                expandedProjectIndex === index ? null : index
+                              );
+                            }}
+                            
                           >
                             {project.name}
                           </h2>
