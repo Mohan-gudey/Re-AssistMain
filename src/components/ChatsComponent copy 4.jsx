@@ -1987,17 +1987,21 @@ export default function ChatsComponent() {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
   
+    const [expandedProjectIndex, setExpandedProjectIndex] = useState(null);
+
+
+
     useEffect(() => {
       const fetchData = async () => {
+        if (selectedProjectIndex === null) return;
+  
         try {
           const response = await axios.get(
-            "https://export.arxiv.org/api/query?search_query=ti:%22electron%20thermal%20conductivity%22&sortBy=lastUpdatedDate&sortOrder=ascending"
+            "https://export.arxiv.org/api/query?search_query=ti:%22LLM%20code%22&sortBy=lastUpdatedDate&sortOrder=ascending"
           );
-  
           // Parse the XML response
           const parser = new DOMParser();
           const xmlDoc = parser.parseFromString(response.data, "application/xml");
-  
           const entries = Array.from(xmlDoc.querySelectorAll("entry")).map((entry) => {
             const title = entry.querySelector("title")?.textContent.trim() || "No Title";
             const authors = Array.from(entry.querySelectorAll("author name")).map(
@@ -2006,21 +2010,77 @@ export default function ChatsComponent() {
             const publishedDate = entry.querySelector("published")?.textContent || "Unknown Date";
             const summary = entry.querySelector("summary")?.textContent.trim() || "No Abstract";
             const link = entry.querySelector("id")?.textContent || "#";
-  
             return { title, authors, publishedDate, summary, link };
           });
-  
           setPapers(entries);
+         
           setLoading(false);
         } catch (err) {
           setError("Failed to fetch data from arXiv API.");
           setLoading(false);
         }
       };
-  
       fetchData();
-    }, []);
-   
+    }, [selectedProjectIndex]);
+    console.log("paperdata:",papers)
+    // Add paper to the selected project and save it in the backend
+    const addPaperToProject = async (paper) => {
+      if (selectedProjectIndex === null) {
+        alert("Please select a project first.");
+        return;
+      }
+  
+      try {
+        const projectId = projects[selectedProjectIndex]._id;
+        const token = localStorage.getItem("token");
+  
+        // Save paper in the backend
+        const paperResponse = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({
+            title: paper.title,
+            url: paper.link,
+          }),
+        });
+  
+        const paperResult = await paperResponse.json();
+        if (!paperResponse.ok) {
+          throw new Error(paperResult.error || "Failed to save paper");
+        }
+  
+        // Add paper to the project in the backend
+        await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
+          method: "PUT",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ paperId: paperResult.paper._id }),
+        });
+  
+        // Update frontend state
+        const updatedProjects = [...projects];
+        updatedProjects[selectedProjectIndex].papers.push({
+          title: paper.title,
+          url: paper.link,
+          id: paperResult.paper._id,
+        });
+        setProjects(updatedProjects);
+  
+        // Remove paper from Arxiv recommendations
+        setPapers((prevPapers) => prevPapers.filter((p) => p.link !== paper.link));
+  
+        alert("Paper added successfully!");
+      } catch (error) {
+        console.error("Error adding paper:", error);
+        alert(`Error: ${error.message}`);
+      }
+    };
+  
   // Project management functions
   const handleNewProjectClick = () => {
     setShowInput(true);
@@ -2308,6 +2368,21 @@ export default function ChatsComponent() {
     }
   };
 
+  const topics = [
+    'CV',
+    'LLM',
+    'Code Generation',
+    'Object Recognition',
+    'ML',
+    'Semantic Embeddings',
+    'Evaluation',
+  ];
+  
+  const getRandomTopics = (count = 2) => {
+    const shuffled = [...topics].sort(() => 0.5 - Math.random());
+    return shuffled.slice(0, count);
+  };
+  
   return (
     <div className="flex flex-col h-screen bg-white text-gray-800 font-sans overflow-hidden">
       {/* Main Header with Navigation Tabs */}
@@ -2385,7 +2460,12 @@ export default function ChatsComponent() {
                             ? "border-l-4 border-blue-500 pl-1.5 shadow-md"
                             : "pl-2"
                         }`}
-                        onClick={() => handleProjectSelect(index)}
+                        onClick={() => {
+                          handleProjectSelect(index);
+                          setExpandedProjectIndex(
+                            expandedProjectIndex === index ? null : index
+                          );
+                        }}
                       >
                         <div className="flex justify-between items-center">
                           <h2
@@ -2396,11 +2476,15 @@ export default function ChatsComponent() {
                             }`}
                             onClick={(e) => e.stopPropagation()}
                           >
-                            {project.name} 
-                            </h2>
+                            {project.name}
+                          </h2>
+
                           <button
                             className="text-gray-500 hover:text-red-500 transition-colors"
-                            onClick={(e) => handleDeleteProject(e, project._id)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleDeleteProject(e, project._id);
+                            }}
                           >
                             <svg
                               xmlns="http://www.w3.org/2000/svg"
@@ -2408,70 +2492,76 @@ export default function ChatsComponent() {
                               viewBox="0 0 20 20"
                               fill="currentColor"
                             >
-                              <path
-                                fillRule="evenodd"
-                                d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                clipRule="evenodd"
-                              />
+                              <circle cx="4" cy="10" r="1.5" />
+                              <circle cx="10" cy="10" r="1.5" />
+                              <circle cx="16" cy="10" r="1.5" />
                             </svg>
                           </button>
                         </div>
-                        {project.papers.length > 0 && (
-                          <ul className="mt-1.5 text-xs text-gray-600 list-disc pl-4 max-h-24 overflow-y-auto">
-                            <li className="text-[0.9rem] mb-1 ml-2">Trigonometry</li>
-                            {project.papers.map((paper, idx) => (
-                              <li
-                                key={idx}
-                                className={`cursor-pointer hover:text-blue-700 py-0.5 flex justify-between items-center ${
-                                  activePaper &&
-                                  activePaper.projectIndex === index &&
-                                  activePaper.paperIndex === idx
-                                    ? "text-blue-700 font-medium"
-                                    : ""
-                                }`}
-                              >
-                                <span
-                                  className="truncate mr-1 ml-4"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handlePaperSelect(paper, index, idx);
-                                  }}
+
+                        {/* Dropdown animation container */}
+                        <div
+                          className={`overflow-hidden transition-all duration-300 ease-in-out ${
+                            expandedProjectIndex === index
+                              ? "max-h-96 opacity-100 mt-1.5"
+                              : "max-h-0 opacity-0"
+                          }`}
+                        >
+                          {project.papers.length > 0 && (
+                            <ul className="text-xs text-gray-600 list-disc pl-4">
+                              {project.papers.map((paper, idx) => (
+                                <li
+                                  key={idx}
+                                  className={`cursor-pointer hover:text-blue-700 py-0.5 flex justify-between items-center ${
+                                    activePaper &&
+                                    activePaper.projectIndex === index &&
+                                    activePaper.paperIndex === idx
+                                      ? "text-blue-700 font-medium"
+                                      : ""
+                                  }`}
                                 >
-                                  {paper.title || "Untitled Paper"}
-                                </span>
-                                <button
-                                  className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    const updatedProjects = [...projects];
-                                    updatedProjects[index].papers.splice(idx, 1);
-                                    setProjects(updatedProjects);
-                                    if (
-                                      activePaper &&
-                                      activePaper.projectIndex === index &&
-                                      activePaper.paperIndex === idx
-                                    ) {
-                                      setActivePaper(null);
-                                    }
-                                  }}
-                                >
-                                  <svg
-                                    xmlns="http://www.w3.org/2000/svg"
-                                    className="h-3 w-3"
-                                    viewBox="0 0 20 20"
-                                    fill="currentColor"
+                                  <div className="flex flex-col justify-between">
+                                    <span
+                                      className="block mr-1 cursor-pointer whitespace-normal break-words"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        handlePaperSelect(paper, index, idx);
+                                      }}
+                                    >
+                                      {paper.title || "Untitled Paper"}
+                                    </span>
+                                    <div className="flex gap-2 text-xs text-blue-600 font-semibold">
+                                      {getRandomTopics(
+                                        Math.floor(Math.random() * 2) + 2
+                                      ).map((topic, i) => (
+                                        <span key={i}>{topic}</span>
+                                      ))}
+                                    </div>
+                                  </div>
+                                  <button
+                                    className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      const updatedProjects = [...projects];
+                                      updatedProjects[index].papers.splice(idx, 1);
+                                      setProjects(updatedProjects);
+
+                                      if (
+                                        activePaper &&
+                                        activePaper.projectIndex === index &&
+                                        activePaper.paperIndex === idx
+                                      ) {
+                                        setActivePaper(null);
+                                      }
+                                    }}
                                   >
-                                    <path
-                                      fillRule="evenodd"
-                                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
-                                      clipRule="evenodd"
-                                    />
-                                  </svg>
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
+                                    ✕
+                                  </button>
+                                </li>
+                              ))}
+                            </ul>
+                          )}
+                        </div>
                       </li>
                     ))}
                   </ul>
@@ -2715,6 +2805,7 @@ export default function ChatsComponent() {
                   <h2 className="text-xl font-semibold text-blue-700 mb-3">
                     {activePaper.name || "Untitled Paper"}
                   </h2>
+                 
                   <div className="border-b border-blue-100 pb-2 mb-4">
                     <p className="text-sm text-gray-700">
                       From project:{" "}
@@ -2722,6 +2813,13 @@ export default function ChatsComponent() {
                         {projects[activePaper.projectIndex]?.name || "Unknown Project"}
                       </span>
                     </p>
+                     {activePaper.url && (
+                      <p className="text-blue-600 underline break-all">
+                        <a href={activePaper.url} target="_blank" rel="noopener noreferrer">
+                        {activePaper.url}
+                        </a>
+                      </p>
+                    )}
                     <p className="text-xs text-gray-500 mt-1">
                       {activePaper.name.toLowerCase().endsWith(".docx") ||
                       activePaper.name.toLowerCase().endsWith(".doc")
@@ -2733,6 +2831,7 @@ export default function ChatsComponent() {
                         : "Document"}
                     </p>
                   </div>
+                  
                   <div className="mt-3 p-4 bg-gray-50 rounded-md border border-blue-50">
                     {(activePaper.name.toLowerCase().endsWith(".docx") ||
                       activePaper.name.toLowerCase().endsWith(".doc")) && (
@@ -2832,18 +2931,16 @@ export default function ChatsComponent() {
                     </div>
                   </div>
                 </div>
-                ) : selectedProjectIndex !== null ? (
+                ) :  selectedProjectIndex !== null && !activePaper ? (
                   <div className="max-w-4xl mx-auto">
                     <div className="text-center mt-8">
                       <h2 className="text-xl font-bold mb-3 bg-blue-50 py-2 px-4 rounded-md inline-block text-blue-700">
                         {projects[selectedProjectIndex].name}
                       </h2>
                       <p className="text-sm text-gray-600">{projects[selectedProjectIndex].papers.length} papers added</p>
-                      <p className="mt-3 text-sm text-gray-700">Ask me anything about your papers!</p>
-                      <p className="text-xs text-blue-600 mt-2">Click on a paper in the left panel to view its contents</p>
                     </div>
-                    
-                    {/* Paper recommendations section in the center */}
+  
+                    {/* Display Arxiv papers */}
                     <h3 className="text-blue-700 font-medium text-md mt-3 flex items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
                         <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
@@ -2851,27 +2948,33 @@ export default function ChatsComponent() {
                       Recommended Papers
                     </h3>
                     <div className="space-y-5 overflow-y-scroll max-h-[60vh] mt-2">
-                    
-                    {papers.map((paper, index) => (
-                      <div key={index} className="bg-white shadow-md rounded-lg p-4 ">
-                        <a href={paper.link}
+                      {papers.map((paper, index) => (
+                        <div key={index} className="bg-white shadow-md rounded-lg p-4">
+                          {/* <h2 className="text-xl font-semibold text-gray-800">{paper.title}</h2> */}
+                          <a href={paper.link}
                           target="_blank"
                           rel="noopener noreferrer"
                           className="inline-block text-gray-800 hover:text-blue-700 font-medium text-xl">
                         {paper.title}
                         </a>
-                        <p className="text-sm text-gray-600 mt-2">
-                          Authors: {paper.authors.join(", ") || "Unknown"}
-                        </p>
-                        <p className="text-sm text-gray-500 mt-1">
-                          Published: {new Date(paper.publishedDate).toLocaleDateString()}
-                        </p>
-                        <p className="text-gray-700 text-sm mt-3">{paper.summary}</p>
-                      </div>
-                    ))}
+                          <p className="text-sm text-gray-600 mt-2">
+                            Authors: {paper.authors.join(", ") || "Unknown"}
+                          </p>
+                          <p className="text-sm text-gray-500 mt-1">
+                            Published: {new Date(paper.publishedDate).toLocaleDateString()}
+                          </p>
+                          <p className="text-gray-700 text-sm mt-3">{paper.summary}</p>
+                          <button
+                            onClick={() => addPaperToProject(paper)}
+                            className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-700 transition"
+                          >
+                            Add to Project
+                          </button>
+                        </div>
+                      ))}
+                    </div>
                   </div>
-                  </div>
-                ) : (
+                ) :(
                   <div className="text-center mt-8">
                     <p className="text-sm text-gray-700">Welcome to Re-Assist.</p>
                     <p className="mt-2 text-sm text-gray-600">Select or create a project to get started.</p>

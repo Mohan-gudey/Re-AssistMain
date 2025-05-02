@@ -381,6 +381,25 @@ export default function DocumentsComponent() {
   //       console.error('Error fetching papers:', err);
   //     });
   // }, []);
+  const handleDownload = async (url, filename) => {
+    try {
+      const response = await fetch(url);
+      const blob = await response.blob();
+  
+      const blobUrl = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = blobUrl;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(blobUrl);
+    } catch (error) {
+      console.error("Download failed:", error);
+    }
+  };
+  
+  
 
   useEffect(() => {
     // Fetch papers when the component mounts
@@ -641,7 +660,8 @@ export default function DocumentsComponent() {
                 key={index}
                 className="grid grid-cols-4 text-sm py-2 px-1 hover:bg-gray-100 rounded transition-colors cursor-pointer items-center"
               >
-                <div className="truncate">{doc.title}</div>
+              
+                <a href={doc.url} target="_blank" className=" hover:text-blue-600">{doc.title.replace(/\.[^/.]+$/, "")}</a>
                 <div className="text-indigo-600">
                   {doc.url ? doc.url.split('.').pop().toUpperCase() : "Unknown"}
                 </div>
@@ -649,14 +669,12 @@ export default function DocumentsComponent() {
                   {new Date(doc.uploadedAt).toLocaleString()}
                 </div>
                 <div>
-                  <a
-                    href={doc.url}
+                <button
+                    onClick={() => handleDownload(doc.url, doc.title || "download.pdf")}
                     className="text-blue-500 hover:underline"
-                    target="_blank"
-                    rel="noopener noreferrer"
                   >
                     Download
-                  </a>
+                  </button>
                 </div>
               </div>
             ))
