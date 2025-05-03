@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import Sidebar from "./Sidebar";
 import apiClient from "../utils/apiClient";
 import ConfirmationModal from "./ConfirmationModal";
-import { MdDeleteForever } from "react-icons/md";
 import axios from "axios";
 import bibtexParse from "bibtex-parse-js";
 export default function ChatsComponent() {
@@ -37,7 +36,19 @@ export default function ChatsComponent() {
     const [expandedProjectIndex, setExpandedProjectIndex] = useState(null);
     const [paperIdToDelete, setPaperIdToDelete] = useState(null);
     const [bibIdToDelete, setBibIdToDelete] = useState(null);
-
+    const [dropdownOpenIndex, setDropdownOpenIndex] = useState(null);
+    const [middleView, setMiddleView] = useState("default"); // can be "default", "summary", "chat", "grants", "conferences" // Default view
+    const [expandedPaper, setExpandedPaper] = useState({
+      projectIndex: null,
+      paperIndex: null,
+    });
+    const [expandedBibEntry, setExpandedBibEntry] = useState({ projectIndex: null, bibIndex: null });
+      useEffect(() => {
+        if (selectedProjectIndex !== null) {
+          setMiddleView("default");
+        }
+      }, [selectedProjectIndex]);
+  
     useEffect(() => {
       const fetchData = async () => {
         if (selectedProjectIndex === null) return;
@@ -577,6 +588,24 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
     const shuffled = [...topics].sort(() => 0.5 - Math.random());
     return shuffled.slice(0, count);
   };
+
+  const conferences = [
+    { name: "NeurIPS 2025", date: "Dec 2025", location: "Vancouver, Canada" },
+    { name: "ICML 2025", date: "July 2025", location: "Vienna, Austria" },
+    { name: "ACL 2025", date: "Aug 2025", location: "Seattle, USA" },
+    { name: "CVPR 2025", date: "Jun 2025", location: "Nashville, USA" },
+    { name: "AAAI 2025", date: "Feb 2025", location: "New York, USA" },
+    { name: "ICLR 2025", date: "May 2025", location: "Montréal, Canada" }, // Added conference
+  ];
+
+  const grants = [
+    { name: "NSF CAREER Award", agency: "NSF", status: "Submitted" },
+    { name: "Google Research Grant", agency: "Google AI", status: "Awarded" },
+    { name: "Horizon Europe Grant", agency: "EU Commission", status: "Pending" },
+    { name: "Microsoft Research Fellowship", agency: "Microsoft", status: "Awarded" },
+    { name: "Amazon Research Grant", agency: "Amazon", status: "Submitted" },
+    { name: "Facebook AI Research Grant", agency: "Meta", status: "Pending" }, // Added grant
+  ];
   
   return (
     <div className="flex flex-col h-screen bg-white text-gray-800 font-sans overflow-hidden">
@@ -640,7 +669,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                       onClick={handleSaveProject}
                       className="px-4 py-2 text-sm bg-blue-600 hover:bg-blue-700 text-white rounded-md"
                     >
-                      Create Project
+                      Create
                     </button>
                   </div>
                 </div>
@@ -690,130 +719,264 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                           {project.name}
                         </h2>
 
-                        <button
-                          className="text-gray-500 hover:text-red-500 transition-colors"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteProject(e, project._id);
-                          }}
+                        <div className="relative inline-block text-left">
+                      <button
+                        className="text-gray-500 hover:text-red-500 transition-colors"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setDropdownOpenIndex(dropdownOpenIndex === index ? null : index);
+                        }}
+                      >
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-3 w-3"
+                          viewBox="0 0 20 20"
+                          fill="currentColor"
                         >
-                          <svg
-                            xmlns="http://www.w3.org/2000/svg"
-                            className="h-3 w-3"
-                            viewBox="0 0 20 20"
-                            fill="currentColor"
+                          <circle cx="4" cy="10" r="1.5" />
+                          <circle cx="10" cy="10" r="1.5" />
+                          <circle cx="16" cy="10" r="1.5" />
+                        </svg>
+                      </button>
+
+                      {dropdownOpenIndex === index && (
+                        <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50">
+                          <ul className="py-1 text-sm text-gray-700">
+                          <li
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setMiddleView("chat");
+                              setDropdownOpenIndex(null);
+                            }}
                           >
-                            <circle cx="4" cy="10" r="1.5" />
-                            <circle cx="10" cy="10" r="1.5" />
-                            <circle cx="16" cy="10" r="1.5" />
-                          </svg>
-                        </button>
+                            chat
+                          </li>
+                          <li
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setMiddleView("summary");
+                              setDropdownOpenIndex(null);
+                            }}
+                          >
+                            Summarize
+                          </li>
+                          <li
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setMiddleView("papers");
+                              setDropdownOpenIndex(null);
+                            }}
+                          >
+                            Papers
+                          </li>
+                          <li
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setMiddleView("grants");
+                              setDropdownOpenIndex(null);
+                            }}
+                          >
+                            Grants
+                          </li>
+                          <li
+                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
+                            onClick={() => {
+                              setMiddleView("conferences");
+                              setDropdownOpenIndex(null);
+                            }}
+                          >
+                            Conferences
+                          </li>
+                            <li
+                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteProject(e, project._id);
+                                setDropdownOpenIndex(null);
+                              }}
+                            >
+                              Delete
+                            </li>
+                          </ul>
+                        </div>
+                      )}
+                    </div>
                       </div>
 
                       {/* Dropdown animation container */}
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          expandedProjectIndex === index
-                            ? "max-h-96 overflow-y-scroll opacity-100 mt-1.5"
-                            : "max-h-0 opacity-0"
+                          expandedProjectIndex === index ? "max-h-96 opacity-100 mt-1.5" : "max-h-0 opacity-0"
                         }`}
                       >
-                        {/* Papers Section */}
-                        {project.papers.length > 0 && (
-                          <ul className="text-xs text-gray-600 list-disc pl-4">
-                            {project.papers.map((paper, idx) => (
-                              <li
-                                key={idx}
-                                className={`cursor-pointer hover:text-black py-0.5 flex justify-between items-center ${
-                                  activePaper &&
-                                  activePaper.projectIndex === index &&
-                                  activePaper.paperIndex === idx
-                                    ? "text-red-600 font-bold"
-                                    : ""
-                                }`}
-                              >
-                                <div className="flex flex-col justify-between ml-3">
-                                  <span
-                                    className="block mr-1 cursor-pointer whitespace-normal break-words"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handlePaperSelect(paper, index, idx);
-                                    }}
-                                  >
-                                    <li>{paper.title || "Untitled Paper"}</li>
-                                  </span>
-                                  <div className="flex gap-2 text-xs text-blue-600 font-semibold">
-                                    {getRandomTopics(Math.floor(Math.random() * 2) + 1).map((topic, i) => (
+                        {/* Render Papers */}
+                        {project.papers.map((paper, idx) => {
+                          const isExpanded =
+                            expandedPaper.projectIndex === index && expandedPaper.paperIndex === idx;
+                          const topicsForThisPaper = getRandomTopics(2); // Get topics ONCE per paper
+
+                          return (
+                            <li
+                              key={idx}
+                              className={`py-0.5 flex flex-col ${
+                                activePaper &&
+                                activePaper.projectIndex === index &&
+                                activePaper.paperIndex === idx
+                                  ? "text-blue-700 font-medium"
+                                  : ""
+                              } hover:bg-gray-100 transition-all duration-300`}
+                            >
+                              <div className="flex justify-between items-center">
+                                {/* Title */}
+                                <ul className="ml-7 list-disc">
+                                <li
+                                  className="cursor-pointer whitespace-normal break-words"
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    handlePaperSelect(paper, index, idx);
+                                  }}
+                                >
+                                  {paper.title || "Untitled Paper"}
+                                </li>
+                              </ul>
+                                {/* Expand Button */}
+                                <button
+                                  className={`text-lg font-bold px-2 py-1 rounded transition-all ${
+                                    isExpanded ? "text-blue-600" : "text-gray-500 hover:text-blue-600 hover:bg-gray-100"
+                                  }`}
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    setExpandedPaper(
+                                      isExpanded
+                                        ? { projectIndex: null, paperIndex: null }
+                                        : { projectIndex: index, paperIndex: idx }
+                                    );
+                                  }}
+                                >
+                                  {isExpanded ? "-" : "+"}
+                                </button>
+                              </div>
+
+                              {/* Expanded Section */}
+                              {isExpanded && (
+                                <div className="mt-2 ml-5 text-sm text-gray-700 space-y-1">
+                                  <p className="line-clamp-2">{paper.summary || "No summary available."}</p>
+                                  <p className="text-xs text-gray-500">Metadata: {paper.meta || "No metadata"}</p>
+
+                                  {/* Topics below summary */}
+                                  <div className="flex gap-2 text-xs text-blue-600 font-semibold mt-1">
+                                    {topicsForThisPaper.map((topic, i) => (
                                       <span key={i}>{topic}</span>
                                     ))}
                                   </div>
-                                </div>
-                                <button
-                                  className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
-                                  onClick={(e) => {
-                                    e.stopPropagation();
-                                    handleDeletePaper(e, project._id, paper._id); // Pass the project ID and paper ID
-                                  }}
-                                >
-                                  <MdDeleteForever />
-                                </button>
-                              </li>
-                            ))}
-                          </ul>
-                        )}
 
-                        {/* .bib Entries Section */}
+                                  {/* Delete Button */}
+                                  <button
+                                    className="text-red-500 hover:text-red-700 text-xs"
+                                    onClick={(e) => {
+                                      e.stopPropagation();
+                                      handleDeletePaper(e, project._id, paper._id);
+                                    }}
+                                  >
+                                    Delete Paper
+                                  </button>
+                                </div>
+                              )}
+                            </li>
+                          );
+                        })}
+
+                        {/* Render .bib Entries */}
                         {project.bibEntries && project.bibEntries.length > 0 && (
-                            <ul className="text-xs text-gray-600 list-disc pl-4">
-                              {project.bibEntries.map((bibEntry, bibIdx) => (
+                          <ul className="text-xs text-gray-600 list-disc pl-4">
+                            {project.bibEntries.map((bibEntry, bibIdx) => {
+                              const isExpanded =
+                                expandedBibEntry.projectIndex === index &&
+                                expandedBibEntry.bibIndex === bibIdx;
+
+                              return (
                                 <li
                                   key={bibIdx}
-                                  className={`cursor-pointer hover:text-gray-900 py-0.5 flex justify-between items-center ${
+                                  className={`py-0.5 flex flex-col ${
                                     activeBibEntry &&
                                     activeBibEntry.projectIndex === index &&
                                     activeBibEntry.bibIndex === bibIdx
-                                      ? "text-red-600 font-bold"
+                                      ? "text-blue-700 font-bold"
                                       : ""
-                                  }`}
+                                  } hover:bg-gray-100 transition-all duration-300`}
                                 >
-                                  <div className="flex flex-col justify-between ml-3">
-                                    <span
-                                      className="block mr-1 cursor-pointer whitespace-normal break-words"
+                                  <div className="flex justify-between items-center">
+                                    {/* Title */}
+                                    <div className="flex flex-col ml-3">
+                                      <span
+                                        className="cursor-pointer whitespace-normal break-words"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleBibEntrySelect(bibEntry, index, bibIdx);
+                                        }}
+                                      >
+                                        <li>{bibEntry.entry?.entryTags?.title || "Untitled Bib Entry"}</li>
+                                      </span>
+                                    </div>
+
+                                    {/* Expand Button */}
+                                    <button
+                                      className={`text-lg font-bold px-2 py-1 rounded transition-all ${
+                                        isExpanded ? "text-blue-600" : "text-gray-500 hover:text-blue-600 hover:bg-gray-100"
+                                      }`}
                                       onClick={(e) => {
                                         e.stopPropagation();
-                                        handleBibEntrySelect(bibEntry, index, bibIdx);
+                                        setExpandedBibEntry(
+                                          isExpanded
+                                            ? { projectIndex: null, bibIndex: null }
+                                            : { projectIndex: index, bibIndex: bibIdx }
+                                        );
                                       }}
                                     >
-                                      <li>{bibEntry.entry.entryTags?.title || "Untitled Bib Entry"}</li>
-                                    </span>
-                                    <div className="flex gap-2 text-xs text-blue-600 font-semibold">
-                                    {getRandomTopics(Math.floor(Math.random() * 2) + 1).map((topic, i) => (
-                                      <span key={i}>{topic}</span>
-                                    ))}
+                                      {isExpanded ? "-" : "+"}
+                                    </button>
                                   </div>
-                                  </div>
-                                  <button
-                                    className="text-gray-500 hover:text-red-500 transition-colors p-0.5"
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      handleDeleteBibEntry(e, project._id, bibEntry._id); // Pass the project ID and bibEntry ID
-                                    }}
-                                  >
-                                    <MdDeleteForever />
-                                  </button>
-                                </li>
-                              ))}
-                            </ul>
-                          )}
 
-                        {/* No Papers or .bib Entries */}
-                        {
-                          (project.papers || []).length === 0 && (project.bibEntries || []).length === 0 && (
-                            <p className="text-sm text-gray-500 italic mt-2">
-                              No papers available.
-                            </p>
-                          )
-                        }
+                                  {/* Expanded Section */}
+                                  {isExpanded && (
+                                    <div className="mt-2 ml-5 text-sm text-gray-700 space-y-1">
+                                      <p className="line-clamp-2">
+                                        {bibEntry.entry?.entryTags?.abstract || "No abstract available."}
+                                      </p>
+                                      <p className="text-xs text-gray-500">
+                                        Year: {bibEntry.entry?.entryTags?.year || "Unknown"}
+                                      </p>
+
+                                      {/* Topics below summary */}
+                                      <div className="flex gap-2 text-xs text-blue-600 font-semibold mt-1">
+                                        {getRandomTopics(Math.floor(Math.random() * 2) + 1).map((topic, i) => (
+                                          <span key={i}>{topic}</span>
+                                        ))}
+                                      </div>
+
+                                      {/* Delete Button */}
+                                      <button
+                                        className="text-red-500 hover:text-red-700 text-xs"
+                                        onClick={(e) => {
+                                          e.stopPropagation();
+                                          handleDeleteBibEntry(e, project._id, bibEntry._id);
+                                        }}
+                                      >
+                                        Delete Bib Entry
+                                      </button>
+                                    </div>
+                                  )}
+                                </li>
+                              );
+                            })}
+                          </ul>
+                        )}
+
+                        {/* No Content Message */}
+                        {(project.papers || []).length === 0 &&
+                          (project.bibEntries || []).length === 0 && (
+                            <p className="text-sm text-gray-500 italic mt-2">No papers or .bib entries available.</p>
+                          )}
                       </div>
                     </li>
                   ))}
@@ -1240,14 +1403,16 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                   </div>
                 </div>
               ) : selectedProjectIndex !== null && !activePaper ? (
-                  <div className="max-w-4xl mx-auto">
+                <div className="max-w-4xl mx-auto">
+                {middleView === "default" || middleView === "papers" ? (
+                  <>
                     <div className="text-center mt-8">
                       <h2 className="text-xl font-bold mb-3 bg-blue-50 py-2 px-4 rounded-md inline-block text-blue-700">
-                        {projects[selectedProjectIndex]?.name || "Unknown Project"}
+                        {projects[selectedProjectIndex].name}
                       </h2>
-                      <p className="text-sm text-gray-600">{projects[selectedProjectIndex]?.papers.length || "Unknow Paper"} papers added</p>
+                      <p className="text-sm text-gray-600">{projects[selectedProjectIndex].papers.length} papers added</p>
                     </div>
-  
+            
                     {/* Display Arxiv papers */}
                     <h3 className="text-blue-700 font-medium text-md mt-3 flex items-center gap-2">
                       <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
@@ -1258,19 +1423,11 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                     <div className="space-y-5 overflow-y-scroll max-h-[60vh] mt-2">
                       {papers.map((paper, index) => (
                         <div key={index} className="bg-white shadow-md rounded-lg p-4">
-                          {/* <h2 className="text-xl font-semibold text-gray-800">{paper.title}</h2> */}
-                          <a href={paper.link}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="inline-block text-gray-800 hover:text-blue-700 font-medium text-xl">
-                        {paper.title}
-                        </a>
-                          <p className="text-sm text-gray-600 mt-2">
-                            Authors: {paper.authors.join(", ") || "Unknown"}
-                          </p>
-                          <p className="text-sm text-gray-500 mt-1">
-                            Published: {new Date(paper.publishedDate).toLocaleDateString()}
-                          </p>
+                          <a href={paper.link} target="_blank" rel="noopener noreferrer" className="inline-block text-gray-800 hover:text-blue-700 font-medium text-xl">
+                            {paper.title}
+                          </a>
+                          <p className="text-sm text-gray-600 mt-2">Authors: {paper.authors.join(", ") || "Unknown"}</p>
+                          <p className="text-sm text-gray-500 mt-1">Published: {new Date(paper.publishedDate).toLocaleDateString()}</p>
                           <p className="text-gray-700 text-sm mt-3">{paper.summary}</p>
                           <button
                             onClick={() => addPaperToProject(paper)}
@@ -1281,7 +1438,95 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                         </div>
                       ))}
                     </div>
+                  </>
+                ) : middleView === "summary" ? (
+                  <>
+                    <h2 className="text-xl font-bold mb-4 text-blue-700">Summary: {projects[selectedProjectIndex].name}</h2>
+                    <p className="text-gray-600 mb-4">Displaying summary of all papers in this project.</p>
+                    <ul className="space-y-3">
+                      {projects[selectedProjectIndex]?.papers.map((paper, idx) => (
+                        <li key={idx} className="bg-white p-4 rounded shadow-sm border border-blue-100">
+                          <h3 className="font-semibold text-gray-800">{paper.title || "Untitled Paper"}</h3>
+                          <p className="text-sm text-gray-500 mt-1">No detailed summary available yet.</p>
+                        </li>
+                      ))}
+                    </ul>
+                  </>
+                ) : middleView === "chat" ? (
+                  <div className="text-center mt-8">
+                <p className="text-sm text-gray-700">Welcome to Re-Assist.</p>
+                <p className="mt-2 text-sm text-gray-600">Select or create a project to get started.</p>
+                {/* Paper recommendations for new users */}
+                <div className="mt-8 max-w-lg mx-auto bg-white rounded-lg p-4 shadow-md border border-blue-100">
+                  <h3 className="text-blue-700 font-medium text-sm mb-3 flex items-center gap-2">
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
+                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
+                    </svg>
+                    Trending Papers
+                  </h3>
+                  <ul className="space-y-2">
+                    {recommendations.map((rec, idx) => (
+                      <li key={idx} className="bg-gray-50 p-2 rounded text-sm hover:bg-blue-50 transition-colors cursor-pointer text-gray-700">
+                        {rec}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              </div>
+                ) : middleView === "grants" ? (
+                  <div className="py-10 px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Grants</h2>
+                    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                      {grants.map((grant, index) => (
+                        <div
+                          key={index}
+                          className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow duration-300"
+                        >
+                          <div className="mb-3 flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            <h3 className="text-lg font-semibold">{grant.name}</h3>
+                          </div>
+                          <p className="text-gray-600"><strong>Agency:</strong> {grant.agency}</p>
+                          <p className="mt-2">
+                            <span className={`inline-block px-2 py-1 text-sm font-medium rounded-full ${
+                              grant.status === "Awarded"
+                                ? "bg-green-100 text-green-800"
+                                : grant.status === "Pending"
+                                ? "bg-yellow-100 text-yellow-800"
+                                : "bg-blue-100 text-blue-800"
+                            }`}>
+                              {grant.status}
+                            </span>
+                          </p>
+                        </div>
+                      ))}
+                    </div>
                   </div>
+                ) : middleView === "conferences" ? (
+                  <div className="py-10 px-4 sm:px-6 lg:px-8">
+                    <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Conferences</h2>
+                    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                      {conferences.map((conf, index) => (
+                        <div
+                          key={index}
+                          className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow duration-300"
+                        >
+                          <div className="mb-3 flex items-center space-x-2">
+                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                            </svg>
+                            <h3 className="text-lg font-semibold">{conf.name}</h3>
+                          </div>
+                          <p className="text-gray-600"><strong>Date:</strong> {conf.date}</p>
+                          <p className="text-gray-600"><strong>Location:</strong> {conf.location}</p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                ) : null}
+              </div>
                 ) : (
                   <div className="text-center mt-8">
                     <p className="text-sm text-gray-700">Welcome to Re-Assist.</p>

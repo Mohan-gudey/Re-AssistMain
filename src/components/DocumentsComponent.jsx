@@ -363,24 +363,6 @@ export default function DocumentsComponent() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  // useEffect(() => {
-  //   // Fetch papers when the component mounts
-  //   axios.get('https://re-assist-backend.onrender.com/api/projects')
-  //     .then((response) => {
-  //       const projects = response.data.projects;
-
-  //       // Flatten the papers array
-  //       const allPapers = projects.flatMap(project => project.papers);
-  //       setPapers(allPapers);
-  //       setFilteredDocuments(allPapers); // Initially set to all papers
-  //       setLoading(false);
-  //     })
-  //     .catch((err) => {
-  //       setError('Error fetching papers');
-  //       setLoading(false);
-  //       console.error('Error fetching papers:', err);
-  //     });
-  // }, []);
   const handleDownload = async (url, filename) => {
     try {
       const response = await fetch(url);
