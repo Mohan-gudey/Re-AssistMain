@@ -36,7 +36,7 @@ export default function ChatsComponent() {
     const [confirmationMessage, setConfirmationMessage] = useState('');
     const [expandedProjectIndex, setExpandedProjectIndex] = useState(null);
     const [paperIdToDelete, setPaperIdToDelete] = useState(null);
-
+    const [bibIdToDelete, setBibIdToDelete] = useState(null);
 
     useEffect(() => {
       const fetchData = async () => {
@@ -250,11 +250,58 @@ export default function ChatsComponent() {
     setIsModalOpen(true); // Open the confirmation modal
   };
 
+  const handleDeleteBibEntry = async (e, projectId, bibId) => {
+    e.stopPropagation();
+    setProjectIdToDelete(projectId); // Store the project ID
+    setBibIdToDelete(bibId); // Store the .bib entry ID
+    setConfirmationMessage('Are you sure you want to delete this .bib entry? This action cannot be undone.');
+    setIsModalOpen(true); // Open the confirmation modal
+  };
+
   const confirmDelete = async () => {
     if (paperIdToDelete !== null) {
       await confirmDeletePaper();
+    } else if (bibIdToDelete !== null) {
+      await confirmDeleteBibEntry();
     } else {
       await confirmDeleteProject();
+    }
+  };
+  
+  const confirmDeleteBibEntry = async () => {
+    try {
+      const bibId = bibIdToDelete;
+      const projectId = projectIdToDelete;
+      console.log('Deleting .bib entry with ID:', bibId, 'from project:', projectId);
+  
+      if (!projectId || !bibId) {
+        console.error('Invalid project ID or .bib entry ID');
+        alert('Invalid project ID or .bib entry ID. Please try again.');
+        return;
+      }
+  
+      // Call the backend API to delete the .bib entry
+      const response = await apiClient.delete(`/api/projects/${projectId}/bib/${bibId}`);
+      console.log('Response from backend:', response.data);
+  
+      // Remove the .bib entry from the local state
+      setProjects((prevProjects) =>
+        prevProjects.map((project) =>
+          project._id === projectId
+            ? {
+                ...project,
+                bibEntries: project.bibEntries.filter((bibEntry) => bibEntry._id !== bibId),
+              }
+            : project
+        )
+      );
+    } catch (error) {
+      console.error('Error deleting .bib entry:', error.response?.data || error.message);
+      alert('Failed to delete the .bib entry. Please try again.');
+    } finally {
+      setIsModalOpen(false); // Close the modal
+      setBibIdToDelete(null); // Reset the .bib entry ID
+      setProjectIdToDelete(null); // Reset the project ID
     }
   };
   
@@ -681,7 +728,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                                   activePaper &&
                                   activePaper.projectIndex === index &&
                                   activePaper.paperIndex === idx
-                                    ? "text-blue-700 font-medium"
+                                    ? "text-red-600 font-bold"
                                     : ""
                                 }`}
                               >
@@ -716,16 +763,16 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                         )}
 
                         {/* .bib Entries Section */}
-                        {project.bibEntries.length > 0 && (
+                        {project.bibEntries && project.bibEntries.length > 0 && (
                             <ul className="text-xs text-gray-600 list-disc pl-4">
                               {project.bibEntries.map((bibEntry, bibIdx) => (
                                 <li
                                   key={bibIdx}
-                                  className={`cursor-pointer hover:text-black py-0.5 flex justify-between items-center ${
+                                  className={`cursor-pointer hover:text-gray-900 py-0.5 flex justify-between items-center ${
                                     activeBibEntry &&
                                     activeBibEntry.projectIndex === index &&
                                     activeBibEntry.bibIndex === bibIdx
-                                      ? "text-blue-700 font-medium"
+                                      ? "text-red-600 font-bold"
                                       : ""
                                   }`}
                                 >
@@ -760,9 +807,13 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                           )}
 
                         {/* No Papers or .bib Entries */}
-                        {project.papers.length === 0 && project.bibEntries.length === 0 && (
-                          <p className="text-sm text-gray-500 italic mt-2">No papers or .bib entries available.</p>
-                        )}
+                        {
+                          (project.papers || []).length === 0 && (project.bibEntries || []).length === 0 && (
+                            <p className="text-sm text-gray-500 italic mt-2">
+                              No papers available.
+                            </p>
+                          )
+                        }
                       </div>
                     </li>
                   ))}
@@ -1192,9 +1243,9 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                   <div className="max-w-4xl mx-auto">
                     <div className="text-center mt-8">
                       <h2 className="text-xl font-bold mb-3 bg-blue-50 py-2 px-4 rounded-md inline-block text-blue-700">
-                        {projects[selectedProjectIndex].name}
+                        {projects[selectedProjectIndex]?.name || "Unknown Project"}
                       </h2>
-                      <p className="text-sm text-gray-600">{projects[selectedProjectIndex].papers.length} papers added</p>
+                      <p className="text-sm text-gray-600">{projects[selectedProjectIndex]?.papers.length || "Unknow Paper"} papers added</p>
                     </div>
   
                     {/* Display Arxiv papers */}
