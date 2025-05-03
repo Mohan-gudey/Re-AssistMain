@@ -7,7 +7,6 @@ import ConfirmationModal from "./ConfirmationModal";
 import { MdDeleteForever } from "react-icons/md";
 import axios from "axios";
 import bibtexParse from "bibtex-parse-js";
-import Project from "../../backend/models/Project";
 export default function ChatsComponent() {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
