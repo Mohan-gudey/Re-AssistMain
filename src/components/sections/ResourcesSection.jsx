@@ -76,8 +76,15 @@
 
 import { motion } from 'framer-motion';
 import { FaArrowRight, FaFileAlt } from 'react-icons/fa';
+import { useNavigate } from 'react-router-dom';
 
 const ResourcesSection = () => {
+
+  const navigate = useNavigate();
+  const HandleNav = () =>{
+    navigate('/resources');
+  }
+
   const resources = [
     {
       title: "Getting Started Guide",
@@ -135,7 +142,7 @@ const ResourcesSection = () => {
         </div>
         
         <div className="text-center mt-10">
-          <button className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium">
+          <button onClick={HandleNav} className="inline-flex items-center text-blue-400 hover:text-blue-300 font-medium">
             View all resources
             <FaArrowRight className="ml-2 text-sm" />
           </button>

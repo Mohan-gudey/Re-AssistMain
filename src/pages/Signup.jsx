@@ -507,6 +507,7 @@ const Signup = () => {
     try {
       const userCredential = await createUserWithEmailAndPassword(auth, email, password);
       const user = userCredential.user;
+      console.log("userlogindata:",user)
   
       // Send email verification
       await sendEmailVerification(user);

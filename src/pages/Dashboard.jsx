@@ -670,6 +670,7 @@ import ConferencesComponent from "../components/ConferencesComponent";
 import HelpComponent from "../components/HelpComponent";
 import ResearchProfilePage from "../components/ResearchProfilePage";
 import CollaboratorsComponent from "../components/CollaboratorsPage"; // Import the new component
+import PdfSummary from "../components/PdfSummary";
 
 function Dashboard() {
   return (
@@ -683,6 +684,7 @@ function Dashboard() {
         <Route path="/conferences" element={<ConferencesComponent />} />
         <Route path="/help" element={<HelpComponent />} />
         <Route path="/profile" element={<ResearchProfilePage />} />
+        <Route path="/pdf-summary" element={<PdfSummary />} />
       </Routes>
     </div>
   );

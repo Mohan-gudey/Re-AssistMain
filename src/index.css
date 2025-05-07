@@ -14,4 +14,18 @@
     -ms-overflow-style: none;  /* For Internet Explorer 10+ */
     scrollbar-width: none;  /* For Firefox */
   }
+  @keyframes fade-in-up {
+    0% {
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    100% {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+  
+  .animate-fade-in-up {
+    animation: fade-in-up 0.25s ease-out;
+  }
   

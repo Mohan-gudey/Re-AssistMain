@@ -6,6 +6,9 @@ import apiClient from "../utils/apiClient";
 import ConfirmationModal from "./ConfirmationModal";
 import axios from "axios";
 import bibtexParse from "bibtex-parse-js";
+import { FaComments, FaFileAlt, FaFilePdf, FaMoneyCheckAlt, FaUniversity, FaTrashAlt } from "react-icons/fa";
+import { extractTextFromFile, analyzeWithGroq } from './pdf/utils/aiUtils';
+
 export default function ChatsComponent() {
   const navigate = useNavigate();
   const [showInput, setShowInput] = useState(false);
@@ -26,6 +29,48 @@ export default function ChatsComponent() {
     "Popular: 'Large Language Models Encode Clinical Knowledge'"
   ]);
 
+  const [abstract, setAbstract] = useState('');
+  const [keywords, setKeywords] = useState([]);
+  const [rawText, setRawText] = useState('');
+  
+  
+    const [userName, setUserName] = useState("User");
+    const [isLoading, setIsLoading] = useState(true);
+
+
+    useEffect(() => {
+      const fetchUserName = async () => {
+        const firebaseId = localStorage.getItem("firebaseId");
+        if (!firebaseId) {
+          setError("No Firebase ID found.");
+          setIsLoading(false);
+          return;
+        }
+
+        try {
+          const response = await fetch(`https://re-assist-backend.onrender.com/api/profiles/profile?firebaseId=${firebaseId}`);
+          const data = await response.json();
+
+          if (!response.ok) {
+            throw new Error(data.message || "Failed to fetch profile.");
+          }
+
+          if (data.fullName) {
+            setUserName(data.fullName);
+          } else {
+            setUserName("User");
+          }
+        } catch (err) {
+          console.error("Error fetching profile:", err.message);
+          setError(err.message);
+        } finally {
+          setIsLoading(false);
+        }
+      };
+
+      fetchUserName();
+    }, []);
+
     const [isModalOpen, setIsModalOpen] = useState(false); // State for modal visibility
     const [projectIdToDelete, setProjectIdToDelete] = useState(null);
     const [activeBibEntry, setActiveBibEntry] = useState(null);
@@ -38,6 +83,7 @@ export default function ChatsComponent() {
     const [bibIdToDelete, setBibIdToDelete] = useState(null);
     const [dropdownOpenIndex, setDropdownOpenIndex] = useState(null);
     const [middleView, setMiddleView] = useState("default"); // can be "default", "summary", "chat", "grants", "conferences" // Default view
+    const dropdownRefs = useRef([]);
     const [expandedPaper, setExpandedPaper] = useState({
       projectIndex: null,
       paperIndex: null,
@@ -48,7 +94,7 @@ export default function ChatsComponent() {
           setMiddleView("default");
         }
       }, [selectedProjectIndex]);
-  
+      
     useEffect(() => {
       const fetchData = async () => {
         if (selectedProjectIndex === null) return;
@@ -81,6 +127,24 @@ export default function ChatsComponent() {
       fetchData();
     }, [selectedProjectIndex]);
     // Add paper to the selected project and save it in the backend
+    
+    useEffect(() => {
+      const handleClickOutside = (event) => {
+        
+        if (dropdownOpenIndex !== null) {
+          const dropdownEl = dropdownRefs.current[dropdownOpenIndex];
+          if (dropdownEl && !dropdownEl.contains(event.target)) {
+            setDropdownOpenIndex(null);
+          }
+        }
+      };
+    
+      document.addEventListener("mousedown", handleClickOutside);
+      return () => {
+        document.removeEventListener("mousedown", handleClickOutside);
+      };
+    }, [dropdownOpenIndex]);
+    
     const addPaperToProject = async (paper) => {
       if (selectedProjectIndex === null) {
         alert("Please select a project first.");
@@ -90,7 +154,7 @@ export default function ChatsComponent() {
       try {
         const projectId = projects[selectedProjectIndex]._id;
         const token = localStorage.getItem("token");
-  
+        localStorage.setItem('token', token);
         // Save paper in the backend
         const paperResponse = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
           method: "POST",
@@ -183,6 +247,7 @@ export default function ChatsComponent() {
     const fetchProjects = async () => {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token
+        localStorage.setItem('token', token);
         const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
           method: "GET",
           headers: {
@@ -387,7 +452,6 @@ export default function ChatsComponent() {
     setActiveBibEntry(null)
   };
 
-
   const handlePaperSelect = (paper, projectIndex, paperIndex) => {
   const selectedPaper = projects[projectIndex]?.papers[paperIndex];
   if (selectedPaper) {
@@ -402,6 +466,9 @@ export default function ChatsComponent() {
     console.error("Invalid paper selection");
   }
 };
+
+  
+  
 
 // Handle Bib Entry Selection
 const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
@@ -451,16 +518,92 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
     [selectedProjectIndex]
   );
 
-  const handleFileSelect = (e) => {
-    if (e.target.files && e.target.files.length > 0 && selectedProjectIndex !== null) {
-      const files = Array.from(e.target.files);
-      setSelectedFiles(files);
-    } else if (selectedProjectIndex === null) {
-      alert("Please select a project first");
+  // const handleFileSelect = (e) => {
+  //   if (e.target.files && e.target.files.length > 0 && selectedProjectIndex !== null) {
+  //     const files = Array.from(e.target.files);
+  //     setSelectedFiles(files);
+  //   } else if (selectedProjectIndex === null) {
+  //     alert("Please select a project first");
+  //   }
+  // };
+
+  // const handleFileSelect = async (e) => {
+  //   if (!e.target.files || e.target.files.length === 0) return;
+  //   console.log("updaloed files getting")
+  
+  //   if (selectedProjectIndex === null) {
+  //     alert("Please select a project first");
+  //     return;
+  //   }
+  
+  //   const files = Array.from(e.target.files);
+  //   setSelectedFiles(files); // Still track all files
+  
+  //   const file = files[0]; // Use the first file for AI processing
+  //   const fileName = file.name.toLowerCase();
+  //   const allowedTypes = ['.pdf', '.docx', '.doc', '.txt', '.rtf', '.odt', '.md'];
+  //   const fileExt = fileName.slice(fileName.lastIndexOf('.'));
+  
+  //   if (!allowedTypes.includes(fileExt)) {
+  //     alert(`Unsupported file type: ${fileExt}. Please upload a valid document.`);
+  //     return;
+  //   }
+  
+  //   setLoading(true); // Show loader during AI processing
+  
+  //   try {
+  //     const text = await extractTextFromFile(file);
+  //     setRawText(text);
+  
+  //     const { abstract, keywords } = await analyzeWithGroq(text);
+  //     setAbstract(abstract);
+  //     setKeywords(keywords.list || []);
+  //   } catch (err) {
+  //     console.error('Processing error:', err);
+  //     alert('Failed to process file. Please try again.');
+  //   } finally {
+  //     setLoading(false);
+  //   }
+  // };
+  
+  const handleFileSelect = async (e) => {
+    if (!e.target.files || e.target.files.length === 0) return;
+
+    const files = Array.from(e.target.files);
+    setSelectedFiles(files);
+
+    const file = files[0];
+    const fileName = file.name.toLowerCase();
+    const allowedTypes = ['.pdf', '.docx', '.doc', '.txt', '.rtf', '.odt', '.md'];
+    const fileExt = fileName.slice(fileName.lastIndexOf('.'));
+
+    if (!allowedTypes.includes(fileExt)) {
+      alert(`Unsupported file type: ${fileExt}. Please upload a valid document.`);
+      return;
+    }
+
+    setLoading(true);
+
+    try {
+      const text = await extractTextFromFile(file);
+      setRawText(text);
+
+      const { abstract, keywords } = await analyzeWithGroq(text);
+      setAbstract(abstract);
+      setKeywords(keywords.list || []);
+
+      // 🔥 Log the AI results directly in ChatComponent
+      console.log('✅ AI Extracted Data:');
+      console.log('Abstract:', abstract);
+      console.log('Keywords:', keywords.list || []);
+      // console.log('Raw Text:', text);
+    } catch (err) {
+      console.error('❌ File processing failed:', err);
+      alert('Failed to process file. Please try again.');
+    } finally {
+      setLoading(false);
     }
   };
-
-
   const handleUploadFiles = async () => {
     if (selectedProjectIndex === null) {
       alert("Please select a project first.");
@@ -516,6 +659,12 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
           // Handle other file types (PDF, DOCX, etc.)
           const formData = new FormData();
           formData.append("files", file);
+
+          // Append metadata
+          formData.append("title", file.name);
+          formData.append("abstract", abstract?.text || '');
+
+          formData.append("keywords", JSON.stringify(keywords));
   
           const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
             method: "POST",
@@ -565,6 +714,9 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
 
   const handleLogout = () => {
     localStorage.removeItem("authStatus");
+    localStorage.removeItem('token');
+    localStorage.removeItem('firebaseId');
+    localStorage.removeItem('isNewUser');
     navigate("/");
   };
 
@@ -590,21 +742,21 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
   };
 
   const conferences = [
-    { name: "NeurIPS 2025", date: "Dec 2025", location: "Vancouver, Canada" },
-    { name: "ICML 2025", date: "July 2025", location: "Vienna, Austria" },
-    { name: "ACL 2025", date: "Aug 2025", location: "Seattle, USA" },
-    { name: "CVPR 2025", date: "Jun 2025", location: "Nashville, USA" },
-    { name: "AAAI 2025", date: "Feb 2025", location: "New York, USA" },
-    { name: "ICLR 2025", date: "May 2025", location: "Montréal, Canada" }, // Added conference
+    { name: "International Conference on Machine Learning", date: "July 23-29, 2025", location: "Vienna, Austria", tag: "Machine Learning" },
+    { name: "ACM Conference on AI Ethics", date: "September 15-18, 2025", location: "San Francisco, USA", tag: "AI Ethics" },
+    { name: "Conference on Computer Vision and Pattern Recognition", date: "June 18-22, 2025", location: "Seattle, USA", tag: "Computer Vision" },
+    { name: "Neural Information Processing Systems", date: "December 5-12, 2025", location: "Montreal, Canada", tag: "Machine Learning" },
+    { name: "International Conference on Robotics and Automation", date: "May 30 - June 5, 2025", location: "Tokyo, Japan", tag: "Robotics" },
+    { name: "European Conference on Artificial Intelligence", date: "August 25-29, 2025", location: "Amsterdam, Netherlands", tag: "Artificial Intelligence" },
   ];
 
   const grants = [
-    { name: "NSF CAREER Award", agency: "NSF", status: "Submitted" },
-    { name: "Google Research Grant", agency: "Google AI", status: "Awarded" },
-    { name: "Horizon Europe Grant", agency: "EU Commission", status: "Pending" },
-    { name: "Microsoft Research Fellowship", agency: "Microsoft", status: "Awarded" },
-    { name: "Amazon Research Grant", agency: "Amazon", status: "Submitted" },
-    { name: "Facebook AI Research Grant", agency: "Meta", status: "Pending" }, // Added grant
+    { name: "NSF AI Research Grant", type: "Federal", deadline: "May 15, 2025", amount: "$500,000" },
+    { name: "NIH Medical AI Innovation", type: "Federal", deadline: "June 30, 2025", amount: "$750,000" },
+    { name: "DOE Energy Systems AI", type: "Federal", deadline: "July 10, 2025", amount: "$1,200,000" },
+    { name: "Gates Foundation Global Health AI", type: "Foundation", deadline: "August 5, 2025", amount: "$950,000" },
+    { name: "Microsoft Research AI Ethics", type: "Industry", deadline: "September 12, 2025", amount: "$350,000" },
+    { name: "European Research Council AI Grant", type: "International", deadline: "October 30, 2025", amount: "€800,000" },
   ];
   
   return (
@@ -719,94 +871,94 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                           {project.name}
                         </h2>
 
-                        <div className="relative inline-block text-left">
-                      <button
-                        className="text-gray-500 hover:text-red-500 transition-colors"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setDropdownOpenIndex(dropdownOpenIndex === index ? null : index);
-                        }}
-                      >
-                        <svg
-                          xmlns="http://www.w3.org/2000/svg"
-                          className="h-3 w-3"
-                          viewBox="0 0 20 20"
-                          fill="currentColor"
+                        <div className="relative  inline-block text-left" ref={(el) => (dropdownRefs.current[index] = el)}>
+                        <button
+                          className="text-gray-500 hover:text-blue-600 transition-colors p-2 rounded-full hover:bg-blue-50"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setDropdownOpenIndex(dropdownOpenIndex === index ? null : index);
+                          }}
                         >
-                          <circle cx="4" cy="10" r="1.5" />
-                          <circle cx="10" cy="10" r="1.5" />
-                          <circle cx="16" cy="10" r="1.5" />
-                        </svg>
-                      </button>
+                          <svg
+                            xmlns="http://www.w3.org/2000/svg"
+                            className="h-4 w-4"
+                            viewBox="0 0 20 20"
+                            fill="currentColor"
+                          >
+                            <circle cx="4" cy="10" r="1.5" />
+                            <circle cx="10" cy="10" r="1.5" />
+                            <circle cx="16" cy="10" r="1.5" />
+                          </svg>
+                        </button>
 
-                      {dropdownOpenIndex === index && (
-                        <div className="absolute right-0 mt-2 w-48 bg-white border rounded shadow-lg z-50">
-                          <ul className="py-1 text-sm text-gray-700">
-                          <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setMiddleView("chat");
-                              setDropdownOpenIndex(null);
-                            }}
-                          >
-                            chat
-                          </li>
-                          <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setMiddleView("summary");
-                              setDropdownOpenIndex(null);
-                            }}
-                          >
-                            Summarize
-                          </li>
-                          <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setMiddleView("papers");
-                              setDropdownOpenIndex(null);
-                            }}
-                          >
-                            Papers
-                          </li>
-                          <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setMiddleView("grants");
-                              setDropdownOpenIndex(null);
-                            }}
-                          >
-                            Grants
-                          </li>
-                          <li
-                            className="px-4 py-2 hover:bg-gray-100 cursor-pointer"
-                            onClick={() => {
-                              setMiddleView("conferences");
-                              setDropdownOpenIndex(null);
-                            }}
-                          >
-                            Conferences
-                          </li>
-                            <li
-                              className="px-4 py-2 hover:bg-gray-100 cursor-pointer text-red-500"
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                handleDeleteProject(e, project._id);
-                                setDropdownOpenIndex(null);
-                              }}
-                            >
-                              Delete
-                            </li>
-                          </ul>
-                        </div>
-                      )}
-                    </div>
+                        {dropdownOpenIndex === index && (
+                          <div className="absolute right-0 mt-2 w-52 bg-white border rounded-xl shadow-lg z-50 ">
+                            <ul className="py-1 text-sm text-gray-700">
+                              <li
+                                className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 cursor-pointer transition"
+                                onClick={() => {
+                                  setMiddleView("chat");
+                                  setDropdownOpenIndex(null);
+                                }}
+                              >
+                                <FaComments className="text-blue-500" /> Chat
+                              </li>
+                              <li
+                                className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 cursor-pointer transition"
+                                onClick={() => {
+                                  setMiddleView("summary");
+                                  setDropdownOpenIndex(null);
+                                }}
+                              >
+                                <FaFileAlt className="text-green-500" /> Summarize
+                              </li>
+                              <li
+                                className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 cursor-pointer transition"
+                                onClick={() => {
+                                  setMiddleView("papers");
+                                  setDropdownOpenIndex(null);
+                                }}
+                              >
+                                <FaFilePdf className="text-red-500" /> Recommended Papers
+                              </li>
+                              <li
+                                className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 cursor-pointer transition"
+                                onClick={() => {
+                                  setMiddleView("grants");
+                                  setDropdownOpenIndex(null);
+                                }}
+                              >
+                                <FaMoneyCheckAlt className="text-purple-500" />Recommended Grants
+                              </li>
+                              <li
+                                className="flex items-center gap-2 px-4 py-2 hover:bg-blue-50 cursor-pointer transition"
+                                onClick={() => {
+                                  setMiddleView("conferences");
+                                  setDropdownOpenIndex(null);
+                                }}
+                              >
+                                <FaUniversity className="text-orange-500" />Recommended Conferences
+                              </li>
+                              <li
+                                className="flex items-center gap-2 px-4 py-2 hover:bg-red-50 cursor-pointer text-red-600 transition"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleDeleteProject(e, project._id);
+                                  setDropdownOpenIndex(null);
+                                }}
+                              >
+                                <FaTrashAlt className="text-red-500" /> Delete
+                              </li>
+                            </ul>
+                          </div>
+                        )}
+                      </div>
                       </div>
 
                       {/* Dropdown animation container */}
                       <div
                         className={`overflow-hidden transition-all duration-300 ease-in-out ${
-                          expandedProjectIndex === index ? "max-h-96 opacity-100 mt-1.5" : "max-h-0 opacity-0"
+                          expandedProjectIndex === index ? "max-h-[40vh] overflow-y-scroll opacity-100 mt-1.5" : "max-h-0 opacity-0"
                         }`}
                       >
                         {/* Render Papers */}
@@ -822,13 +974,13 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                                 activePaper &&
                                 activePaper.projectIndex === index &&
                                 activePaper.paperIndex === idx
-                                  ? "text-blue-700 font-medium"
+                                  ? "text-blue-700 font-bold"
                                   : ""
                               } hover:bg-gray-100 transition-all duration-300`}
                             >
                               <div className="flex justify-between items-center">
                                 {/* Title */}
-                                <ul className="ml-7 list-disc">
+                                <ul className="ml-7 max-w-[80%] list-disc">
                                 <li
                                   className="cursor-pointer whitespace-normal break-words"
                                   onClick={(e) => {
@@ -859,8 +1011,8 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
 
                               {/* Expanded Section */}
                               {isExpanded && (
-                                <div className="mt-2 ml-5 text-sm text-gray-700 space-y-1">
-                                  <p className="line-clamp-2">{paper.summary || "No summary available."}</p>
+                                <div className="mt-2 ml-10 text-sm text-gray-700 space-y-1">
+                                  <p className="line-clamp-2 text-xs">{paper.summary || "No summary available."}</p>
                                   <p className="text-xs text-gray-500">Metadata: {paper.meta || "No metadata"}</p>
 
                                   {/* Topics below summary */}
@@ -907,7 +1059,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                                 >
                                   <div className="flex justify-between items-center">
                                     {/* Title */}
-                                    <div className="flex flex-col ml-3">
+                                    <div className="flex max-w-[85%] flex-col ml-3">
                                       <span
                                         className="cursor-pointer whitespace-normal break-words"
                                         onClick={(e) => {
@@ -939,8 +1091,8 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
 
                                   {/* Expanded Section */}
                                   {isExpanded && (
-                                    <div className="mt-2 ml-5 text-sm text-gray-700 space-y-1">
-                                      <p className="line-clamp-2">
+                                    <div className="mt-2 ml-8 text-sm text-gray-700 space-y-1">
+                                      <p className="line-clamp-2 text-xs">
                                         {bibEntry.entry?.entryTags?.abstract || "No abstract available."}
                                       </p>
                                       <p className="text-xs text-gray-500">
@@ -962,7 +1114,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                                           handleDeleteBibEntry(e, project._id, bibEntry._id);
                                         }}
                                       >
-                                        Delete Bib Entry
+                                        Delete Paper
                                       </button>
                                     </div>
                                   )}
@@ -975,7 +1127,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                         {/* No Content Message */}
                         {(project.papers || []).length === 0 &&
                           (project.bibEntries || []).length === 0 && (
-                            <p className="text-sm text-gray-500 italic mt-2">No papers or .bib entries available.</p>
+                            <p className="text-sm text-gray-500 italic mt-2">No papers available.</p>
                           )}
                       </div>
                     </li>
@@ -1148,7 +1300,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                     />
                   </svg>
                 </div>
-                <span>User</span>
+                <span>{userName}</span>
               </div>
               <svg
                 xmlns="http://www.w3.org/2000/svg"
@@ -1337,14 +1489,31 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                         </p>
                       </div>
                     )}
-                  <div className="mt-6 border-t border-blue-100 pt-4">
+                  {/* <div className="mt-6 border-t border-blue-100 pt-4">
                     <h3 className="text-blue-700 font-medium mb-2">Key insights</h3>
                     <ul className="text-sm text-gray-700 space-y-1">
                       <li>• This paper presents a novel approach to research</li>
                       <li>• Methodology combines multiple disciplines</li>
                       <li>• Results indicate significant improvements</li>
                     </ul>
-                  </div>
+                  </div> */}
+
+<div className="mt-6 border-t border-blue-100 pt-4">
+  <h3 className="text-blue-700 font-medium mb-2">Abstract</h3>
+  <p className="text-sm text-gray-700">{activePaper.abstract}</p>
+
+  <h3 className="text-blue-700 font-medium mt-4 mb-2">Keywords</h3>
+  {activePaper.keywords && activePaper.keywords.length > 0 ? (
+    <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
+      {activePaper.keywords.map((keyword, idx) => (
+        <li key={idx}>{keyword}</li>
+      ))}
+    </ul>
+  ) : (
+    <p className="text-sm text-gray-500">No keywords available.</p>
+  )}
+</div>
+
                 </div>
               </div>
               ) : activeBibEntry ? (
@@ -1453,7 +1622,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                     </ul>
                   </>
                 ) : middleView === "chat" ? (
-                  <div className="text-center mt-8">
+                <div className="text-center mt-8">
                 <p className="text-sm text-gray-700">Welcome to Re-Assist.</p>
                 <p className="mt-2 text-sm text-gray-600">Select or create a project to get started.</p>
                 {/* Paper recommendations for new users */}
@@ -1472,55 +1641,99 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                     ))}
                   </ul>
                 </div>
+                <div className="absolute bottom-3 w-[50%] border-t border-blue-100 pt-3">
+                <div className="flex gap-2">
+                  <input
+                    className="flex-1 bg-white text-gray-800 p-2 rounded-md border border-blue-200 focus:border-blue-500 focus:outline-none text-sm"
+                    placeholder="Type a message"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                  />
+                  <button 
+                    className="bg-blue-600 hover:bg-blue-700 p-2 rounded-md transition-colors text-white"
+                    onClick={handleSendMessage}
+                  >
+                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                    </svg>
+                  </button>
+                </div>
+  
+                
               </div>
-                ) : middleView === "grants" ? (
-                  <div className="py-10 px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Grants</h2>
-                    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+              </div>
+                ) :middleView === "grants" ? (
+                  <div className="py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-2xl font-bold text-indigo-700">Recommended Grants</h2>
+                      <div className="text-sm text-gray-500">Showing {grants.length} results</div>
+                    </div>
+                    
+                    <div className="mb-6">
+                      <input
+                        type="text"
+                        placeholder="Search grants..."
+                        className="w-full px-4 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-indigo-500"
+                      />
+                    </div>
+                    
+                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
                       {grants.map((grant, index) => (
                         <div
                           key={index}
-                          className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow duration-300"
+                          className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
                         >
-                          <div className="mb-3 flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-blue-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
-                            </svg>
-                            <h3 className="text-lg font-semibold">{grant.name}</h3>
+                          <div className="p-5">
+                            <div className="mb-2">
+                              <h3 className="text-lg font-semibold text-indigo-600">{grant.name}</h3>
+                              <p className="text-sm text-gray-500">{grant.type}</p>
+                            </div>
+                            <div className="flex justify-between items-center mb-3">
+                              <p className="text-sm text-gray-700">Deadline: {grant.deadline}</p>
+                              <p className="text-lg font-bold text-indigo-700">{grant.amount}</p>
+                            </div>
+                            <div className="flex space-x-2">
+                              <button className="bg-indigo-100 hover:bg-indigo-200 text-indigo-800 px-3 py-1 rounded-md text-sm">
+                                View Details
+                              </button>
+                              <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-md text-sm">
+                                Track
+                              </button>
+                              <button className="bg-green-500 hover:bg-green-600 text-white px-3 py-1 rounded-md text-sm">
+                                Apply
+                              </button>
+                            </div>
                           </div>
-                          <p className="text-gray-600"><strong>Agency:</strong> {grant.agency}</p>
-                          <p className="mt-2">
-                            <span className={`inline-block px-2 py-1 text-sm font-medium rounded-full ${
-                              grant.status === "Awarded"
-                                ? "bg-green-100 text-green-800"
-                                : grant.status === "Pending"
-                                ? "bg-yellow-100 text-yellow-800"
-                                : "bg-blue-100 text-blue-800"
-                            }`}>
-                              {grant.status}
-                            </span>
-                          </p>
                         </div>
                       ))}
                     </div>
                   </div>
                 ) : middleView === "conferences" ? (
-                  <div className="py-10 px-4 sm:px-6 lg:px-8">
-                    <h2 className="text-2xl font-bold text-blue-700 mb-6 text-center">Conferences</h2>
-                    <div className="grid gap-6 sm:grid-cols-1 md:grid-cols-2 lg:grid-cols-3">
+                  <div className="py-6 px-4 sm:px-6 lg:px-8">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-2xl font-bold text-indigo-700">Recommended Conferences</h2>
+                    </div>
+                    
+                    <div className="grid gap-4 sm:grid-cols-1 md:grid-cols-2">
                       {conferences.map((conf, index) => (
                         <div
                           key={index}
-                          className="bg-white rounded-lg shadow-md p-6 hover:shadow-xl transition-shadow duration-300"
+                          className="bg-white rounded-lg shadow border border-gray-200 overflow-hidden"
                         >
-                          <div className="mb-3 flex items-center space-x-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-purple-500" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                            </svg>
-                            <h3 className="text-lg font-semibold">{conf.name}</h3>
+                          <div className="p-5">
+                            <h3 className="text-lg font-semibold text-indigo-600 mb-2">{conf.name}</h3>
+                            <p className="text-sm text-gray-700 mb-1">{conf.date}</p>
+                            <p className="text-sm text-indigo-500 mb-3">{conf.location}</p>
+                            <div className="flex justify-between items-center">
+                              <span className="bg-indigo-100 text-indigo-800 px-3 py-1 rounded-md text-sm">
+                                {conf.tag}
+                              </span>
+                              <button className="bg-gray-100 hover:bg-gray-200 text-gray-800 px-3 py-1 rounded-md text-sm">
+                                Track
+                              </button>
+                            </div>
                           </div>
-                          <p className="text-gray-600"><strong>Date:</strong> {conf.date}</p>
-                          <p className="text-gray-600"><strong>Location:</strong> {conf.location}</p>
                         </div>
                       ))}
                     </div>
@@ -1561,29 +1774,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                 )}
               </div>
   
-              <div className="border-t border-blue-100 pt-3">
-                <div className="flex gap-2">
-                  <input
-                    className="flex-1 bg-white text-gray-800 p-2 rounded-md border border-blue-200 focus:border-blue-500 focus:outline-none text-sm"
-                    placeholder="Type a message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
-                  />
-                  <button 
-                    className="bg-blue-600 hover:bg-blue-700 p-2 rounded-md transition-colors text-white"
-                    onClick={handleSendMessage}
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
-                  </button>
-                </div>
-  
-                <div className="flex items-center justify-between mt-2 gap-2">
-                  {/* Controls removed as per request */}
-                </div>
-              </div>
+            
             </div>
           </div>
           <ConfirmationModal

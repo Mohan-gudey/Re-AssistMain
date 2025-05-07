@@ -282,17 +282,25 @@ export default function FeedbackForm({ isOpen, onClose }) {
     e.preventDefault();
   
     try {
-      const response = await axios.post("https://re-assist-backend.onrender.com/api/feedback", {
+      // Build the payload conditionally based on feedback type
+      const payload = {
         type: feedbackType,
-        rating,
-        text: feedbackText
-      });
+      };
   
-      console.log("Feedback submitted:", response.data);  // Log the success response
+      if (feedbackType === "feature") {
+        payload.featureTitle = "Untitled Feature"; // You can add a field in UI later
+        payload.featureDescription = feedbackText; // Use text as description
+        payload.featurePriority = "medium"; // Default priority
+      } else {
+        payload.rating = rating;
+        payload.text = feedbackText;
+      }
   
+      const response = await axios.post("https://re-assist-backend.onrender.com/api/feedback", payload);
+  
+      console.log("Feedback submitted:", response.data);
       setSubmitted(true);
   
-      // Reset form after 2 seconds and close modal
       setTimeout(() => {
         setFeedbackType("general");
         setRating(0);
@@ -301,7 +309,7 @@ export default function FeedbackForm({ isOpen, onClose }) {
         onClose();
       }, 2000);
     } catch (error) {
-      console.error("Error submitting feedback:", error);  // Log any errors
+      console.error("Error submitting feedback:", error);
     }
   };
   

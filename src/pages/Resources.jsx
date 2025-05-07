@@ -232,7 +232,6 @@ const Resources = () => {
   return (
     <div className="min-h-screen  text-gray-100 flex flex-col">
       <Header />
-      
       <main className="flex-grow">
         {/* Hero Section with Logo */}
         <div className="bg-gradient-to-br from-blue-900 to-indigo-900 py-16">
@@ -280,31 +279,31 @@ const Resources = () => {
             <div className="flex flex-wrap gap-2 mb-4 md:mb-0">
               <button
                 onClick={() => setActiveFilter('all')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'all' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'all' ? 'bg-blue-600 text-white' : ' text-gray-500 hover:text-gray-300 hover:bg-gray-700'}`}
               >
                 All Resources
               </button>
               <button
                 onClick={() => setActiveFilter('guide')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'guide' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'guide' ? 'bg-blue-600 text-white' : ' text-gray-500 hover:text-gray-300 hover:bg-gray-700'}`}
               >
                 Guides
               </button>
               <button
                 onClick={() => setActiveFilter('tutorial')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'tutorial' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'tutorial' ? 'bg-blue-600 text-white' : ' text-gray-500 hover:text-gray-300 hover:bg-gray-700'}`}
               >
                 Tutorials
               </button>
               <button
                 onClick={() => setActiveFilter('video')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'video' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'video' ? 'bg-blue-600 text-white' : ' text-gray-500 hover:text-gray-300 hover:bg-gray-700'}`}
               >
                 Videos
               </button>
               <button
                 onClick={() => setActiveFilter('documentation')}
-                className={`px-4 py-2 rounded-lg ${activeFilter === 'documentation' ? 'bg-blue-600 text-white' : ' text-gray-300 hover:bg-gray-700'}`}
+                className={`px-4 py-2 rounded-lg ${activeFilter === 'documentation' ? 'bg-blue-600 text-white' : ' text-gray-500 hover:text-gray-300 hover:bg-gray-700'}`}
               >
                 Documentation
               </button>
@@ -316,7 +315,7 @@ const Resources = () => {
               <select
                 value={categoryFilter}
                 onChange={(e) => setCategoryFilter(e.target.value)}
-                className="px-4 py-2 rounded-lg  border border-gray-700 text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-4 py-2 rounded-lg  border border-gray-700 text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="all">All Levels</option>
                 <option value="beginner">Beginner</option>
@@ -328,7 +327,7 @@ const Resources = () => {
               <select
                 value={sortBy}
                 onChange={(e) => setSortBy(e.target.value)}
-                className="px-4 py-2 rounded-lg  border border-gray-700 text-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                className="px-4 py-2 rounded-lg  border border-gray-700 text-gray-500 focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
               >
                 <option value="newest">Newest First</option>
                 <option value="oldest">Oldest First</option>
@@ -382,7 +381,7 @@ const Resources = () => {
                     </div>
                     
                     <h3 className="text-xl font-semibold mb-2">{resource.title}</h3>
-                    <p className="text-gray-400 mb-4">{resource.description}</p>
+                    <p className="text-gray-500 mb-4">{resource.description}</p>
                     
                     <div className="flex justify-between items-center mb-4">
                       <div className="flex items-center text-gray-500 text-sm">
@@ -404,7 +403,7 @@ const Resources = () => {
           ) : (
             <div className="text-center py-16  rounded-xl border border-gray-700">
               <FaSearch className="mx-auto text-5xl text-gray-600 mb-4" />
-              <h3 className="text-2xl text-gray-300 mb-2">No resources found</h3>
+              <h3 className="text-2xl text-gray-500 mb-2">No resources found</h3>
               <p className="text-gray-400 mb-6">Try adjusting your search or filters to find what you're looking for</p>
               <button 
                 onClick={clearFilters}
