@@ -48,7 +48,7 @@ export default function ChatsComponent() {
         }
 
         try {
-          const response = await fetch(`http://localhost:5000/api/profiles/profile?firebaseId=${firebaseId}`);
+          const response = await fetch(`https://re-assist-backend.onrender.com/api/profiles/profile?firebaseId=${firebaseId}`);
           const data = await response.json();
 
           if (!response.ok) {
@@ -156,7 +156,7 @@ export default function ChatsComponent() {
         const token = localStorage.getItem("token");
         localStorage.setItem('token', token);
         // Save paper in the backend
-        const paperResponse = await fetch("http://localhost:5000/api/papers/upload", {
+        const paperResponse = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -174,7 +174,7 @@ export default function ChatsComponent() {
         }
   
         // Add paper to the project in the backend
-        await fetch(`http://localhost:5000/api/projects/${projectId}/add-paper`, {
+        await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -217,7 +217,7 @@ export default function ChatsComponent() {
     }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:5000/api/projects", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -248,7 +248,7 @@ export default function ChatsComponent() {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token
         localStorage.setItem('token', token);
-        const response = await fetch("http://localhost:5000/api/projects", {
+        const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -285,7 +285,7 @@ export default function ChatsComponent() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/api/papers/upload", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -630,7 +630,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
               const parsedData = bibtexParse.toJSON(content); // Parse .bib content
   
               // Send parsed .bib data to the backend (no strict validation)
-              const response = await fetch(`http://localhost:5000/api/projects/${projectId}/add-bib`, {
+              const response = await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-bib`, {
                 method: "PUT",
                 headers: {
                   "Content-Type": "application/json",
@@ -666,7 +666,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
 
           formData.append("keywords", JSON.stringify(keywords));
   
-          const response = await fetch("http://localhost:5000/api/papers/upload", {
+          const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -681,7 +681,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
   
           const result = await response.json();
           for (const paper of result.papers) {
-            await fetch(`http://localhost:5000/api/projects/${projectId}/add-paper`, {
+            await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
