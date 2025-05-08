@@ -118,12 +118,6 @@ const Header = ({ handleNav }) => {
               Resources
             </button>
             <button 
-              onClick={() => handleNav('contact')}
-              className="text-gray-800 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
-            >
-              Contact
-            </button>
-            <button 
               onClick={() => handleNav('login')}
               className="text-gray-800 hover:text-blue-600 px-3 py-2 text-sm font-medium transition-colors"
             >

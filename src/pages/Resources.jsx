@@ -392,10 +392,10 @@ const Resources = () => {
                       </div>
                     </div>
                     
-                    <Link to={`/resources/${resource.id}`} className="text-blue-400 hover:text-blue-300 font-medium inline-flex items-center">
+                    {/* <Link to={`/resources/${resource.id}`} className="text-blue-400 hover:text-blue-300 font-medium inline-flex items-center">
                       View Resource
                       <FaArrowRight className="ml-2 text-sm" />
-                    </Link>
+                    </Link> */}
                   </div>
                 </div>
               ))}

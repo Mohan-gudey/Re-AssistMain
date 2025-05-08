@@ -52,7 +52,7 @@
 //       try {
 //         const token = localStorage.getItem('token'); // Get the JWT token
   
-//         const response = await axios.get('http://localhost:5000/api/projects', {
+//         const response = await axios.get('https://re-assist-backend.onrender.com/api/projects', {
 //           headers: {
 //             Authorization: `Bearer ${token}`, // Include the token
 //           },
@@ -522,7 +522,7 @@ useEffect(() => {
     const fetchPapers = async () => {
       try {
         const token = localStorage.getItem('token');
-        const response = await axios.get('http://localhost:5000/api/projects', {
+        const response = await axios.get('https://re-assist-backend.onrender.com/api/projects', {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -643,7 +643,7 @@ useEffect(() => {
     try {
       const token = localStorage.getItem('token');
   
-      const uploadResponse = await fetch("http://localhost:5000/api/papers/upload", {
+      const uploadResponse = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -663,7 +663,7 @@ useEffect(() => {
       const uploadedPaper = uploadData.paper;
   
       const addPaperResponse = await fetch(
-        `http://localhost:5000/api/projects/${projectId}/add-paper`,
+        `https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`,
         {
           method: "PUT",
           headers: {

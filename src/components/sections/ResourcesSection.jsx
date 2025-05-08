@@ -132,10 +132,10 @@ const ResourcesSection = () => {
                 </div>
                 <h3 className="text-xl font-semibold text-gray-800 mb-2">{resource.title}</h3>
                 <p className="text-gray-600 mb-4">{resource.description}</p>
-                <button className="text-blue-400 hover:text-blue-300 font-medium inline-flex items-center">
+                {/* <button className="text-blue-400 hover:text-blue-300 font-medium inline-flex items-center">
                   Read more
                   <FaArrowRight className="ml-2 text-sm" />
-                </button>
+                </button> */}
               </div>
             </motion.div>
           ))}

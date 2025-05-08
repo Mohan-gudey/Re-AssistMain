@@ -50,7 +50,7 @@ const CTASection = ({ handleNav }) => {
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
             <button 
-              onClick={() => handleNav('join')}
+              onClick={() => handleNav('signup')}
               className="bg-blue-500 hover:bg-blue-600 text-white px-8 py-3 rounded-lg font-medium text-lg transition-colors"
             >
               Start Free Trial

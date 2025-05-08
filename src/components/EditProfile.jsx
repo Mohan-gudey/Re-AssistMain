@@ -81,7 +81,7 @@ export default function EditProfile({ onSave, initialProfile = {} }) {
     });
   
     axios
-      .put('http://localhost:5000/api/profiles/update-profile', formData, {
+      .put('https://re-assist-backend.onrender.com/api/profiles/update-profile', formData, {
         headers: {
           Authorization: `Bearer ${token}`, // Ensure this is correct
         },

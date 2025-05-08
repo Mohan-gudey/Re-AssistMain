@@ -48,7 +48,7 @@ export default function ChatsComponent() {
         }
 
         try {
-          const response = await fetch(`http://localhost:5000/api/profiles/profile?firebaseId=${firebaseId}`);
+          const response = await fetch(`https://re-assist-backend.onrender.com/api/profiles/profile?firebaseId=${firebaseId}`);
           const data = await response.json();
 
           if (!response.ok) {
@@ -156,7 +156,7 @@ export default function ChatsComponent() {
         const token = localStorage.getItem("token");
         localStorage.setItem('token', token);
         // Save paper in the backend
-        const paperResponse = await fetch("http://localhost:5000/api/papers/upload", {
+        const paperResponse = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
           method: "POST",
           headers: {
             "Content-Type": "application/json",
@@ -174,7 +174,7 @@ export default function ChatsComponent() {
         }
   
         // Add paper to the project in the backend
-        await fetch(`http://localhost:5000/api/projects/${projectId}/add-paper`, {
+        await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
           method: "PUT",
           headers: {
             "Content-Type": "application/json",
@@ -217,7 +217,7 @@ export default function ChatsComponent() {
     }
     try {
       const token = localStorage.getItem('token');
-      const response = await fetch("http://localhost:5000/api/projects", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -248,7 +248,7 @@ export default function ChatsComponent() {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token
         localStorage.setItem('token', token);
-        const response = await fetch("http://localhost:5000/api/projects", {
+        const response = await fetch("https://re-assist-backend.onrender.com/api/projects", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -285,7 +285,7 @@ export default function ChatsComponent() {
       return;
     }
     try {
-      const response = await fetch("http://localhost:5000/api/papers/upload", {
+      const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({
@@ -458,6 +458,8 @@ export default function ChatsComponent() {
     setActivePaper({
       name: selectedPaper.title || "Untitled Paper",
       url: selectedPaper.url,
+      abstract:selectedPaper.abstract || '',
+      keywords:selectedPaper.keywords || '',
       projectIndex,
       paperIndex,
     });
@@ -467,8 +469,6 @@ export default function ChatsComponent() {
   }
 };
 
-  
-  
 
 // Handle Bib Entry Selection
 const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
@@ -518,54 +518,6 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
     [selectedProjectIndex]
   );
 
-  // const handleFileSelect = (e) => {
-  //   if (e.target.files && e.target.files.length > 0 && selectedProjectIndex !== null) {
-  //     const files = Array.from(e.target.files);
-  //     setSelectedFiles(files);
-  //   } else if (selectedProjectIndex === null) {
-  //     alert("Please select a project first");
-  //   }
-  // };
-
-  // const handleFileSelect = async (e) => {
-  //   if (!e.target.files || e.target.files.length === 0) return;
-  //   console.log("updaloed files getting")
-  
-  //   if (selectedProjectIndex === null) {
-  //     alert("Please select a project first");
-  //     return;
-  //   }
-  
-  //   const files = Array.from(e.target.files);
-  //   setSelectedFiles(files); // Still track all files
-  
-  //   const file = files[0]; // Use the first file for AI processing
-  //   const fileName = file.name.toLowerCase();
-  //   const allowedTypes = ['.pdf', '.docx', '.doc', '.txt', '.rtf', '.odt', '.md'];
-  //   const fileExt = fileName.slice(fileName.lastIndexOf('.'));
-  
-  //   if (!allowedTypes.includes(fileExt)) {
-  //     alert(`Unsupported file type: ${fileExt}. Please upload a valid document.`);
-  //     return;
-  //   }
-  
-  //   setLoading(true); // Show loader during AI processing
-  
-  //   try {
-  //     const text = await extractTextFromFile(file);
-  //     setRawText(text);
-  
-  //     const { abstract, keywords } = await analyzeWithGroq(text);
-  //     setAbstract(abstract);
-  //     setKeywords(keywords.list || []);
-  //   } catch (err) {
-  //     console.error('Processing error:', err);
-  //     alert('Failed to process file. Please try again.');
-  //   } finally {
-  //     setLoading(false);
-  //   }
-  // };
-  
   const handleFileSelect = async (e) => {
     if (!e.target.files || e.target.files.length === 0) return;
 
@@ -630,7 +582,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
               const parsedData = bibtexParse.toJSON(content); // Parse .bib content
   
               // Send parsed .bib data to the backend (no strict validation)
-              const response = await fetch(`http://localhost:5000/api/projects/${projectId}/add-bib`, {
+              const response = await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-bib`, {
                 method: "PUT",
                 headers: {
                   "Content-Type": "application/json",
@@ -663,10 +615,9 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
           // Append metadata
           formData.append("title", file.name);
           formData.append("abstract", abstract?.text || '');
-
           formData.append("keywords", JSON.stringify(keywords));
   
-          const response = await fetch("http://localhost:5000/api/papers/upload", {
+          const response = await fetch("https://re-assist-backend.onrender.com/api/papers/upload", {
             method: "POST",
             headers: {
               Authorization: `Bearer ${token}`,
@@ -681,7 +632,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
   
           const result = await response.json();
           for (const paper of result.papers) {
-            await fetch(`http://localhost:5000/api/projects/${projectId}/add-paper`, {
+            await fetch(`https://re-assist-backend.onrender.com/api/projects/${projectId}/add-paper`, {
               method: "PUT",
               headers: {
                 "Content-Type": "application/json",
@@ -1400,6 +1351,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                   </p>
                 </div>
                 
+                
                 <div className="mt-3 p-4 bg-gray-50 rounded-md border border-blue-50">
                   {(activePaper.name.toLowerCase().endsWith(".docx") ||
                     activePaper.name.toLowerCase().endsWith(".doc")) && (
@@ -1489,32 +1441,36 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                         </p>
                       </div>
                     )}
-                  <div className="mt-6 border-t border-blue-100 pt-4">
-                    <h3 className="text-blue-700 font-medium mb-2">Key insights</h3>
-                    <ul className="text-sm text-gray-700 space-y-1">
-                      <li>• This paper presents a novel approach to research</li>
-                      <li>• Methodology combines multiple disciplines</li>
-                      <li>• Results indicate significant improvements</li>
-                    </ul>
+                  <div>
+                  <div>
+                    <h1 className="text-blue-700 font-medium mb-2">Abstract:</h1>
+                    <p className="text-sm text-gray-700 whitespace-pre-line">
+                      {activePaper.abstract || 'No abstract available.'}
+                    </p>
                   </div>
-
-{/* <div className="mt-6 border-t border-blue-100 pt-4">
-  <h3 className="text-blue-700 font-medium mb-2">Abstract</h3>
-  <p className="text-sm text-gray-700">{activePaper.abstract}</p>
-
-  <h3 className="text-blue-700 font-medium mt-4 mb-2">Keywords</h3>
-  {activePaper.keywords && activePaper.keywords.length > 0 ? (
-    <ul className="text-sm text-gray-700 space-y-1 list-disc list-inside">
-      {activePaper.keywords.map((keyword, idx) => (
-        <li key={idx}>{keyword}</li>
-      ))}
-    </ul>
-  ) : (
-    <p className="text-sm text-gray-500">No keywords available.</p>
-  )}
-</div> */}
+                </div>
+                <div>
+                  <h1 className="text-blue-700 mt-4 font-medium mb-2">Keywords:</h1>
+                  {Array.isArray(activePaper.keywords) && activePaper.keywords.length > 0 ? (
+                    <section>
+                    <div className="flex flex-wrap gap-2">
+                      {activePaper.keywords.map((keyword, index) => (
+                        <span
+                          key={index}
+                          className="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm"
+                        >
+                          {keyword}
+                        </span>
+                      ))}
+                    </div>
+                  </section>
+                  ) : (
+                    <p className="text-sm text-gray-700 whitespace-pre-line" >No keywords available.</p>
+                  )}
+                </div>
 
                 </div>
+                
               </div>
               ) : activeBibEntry ? (
                 <div className="bg-white rounded-md p-6 max-w-3xl mx-auto shadow-lg border border-blue-100">
