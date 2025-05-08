@@ -89,12 +89,13 @@ const handleSubmit = async (e) => {
   try {
     const token = localStorage.getItem('token'); // 🔐 Get the token from localStorage
     const firebaseId = localStorage.getItem('firebaseId');
-
+    console.log("token",token)
+    console.log("firebaseId",firebaseId)
     if (!token || !firebaseId) {
       throw new Error('Authentication token or Firebase ID not found.');
     }
 
-    const response = await fetch('https://re-assist-backend.onrender.com/api/profiles/update-profile', {
+    const response = await fetch('http://localhost:5000/api/profiles/update-profile', {
       method: 'PUT',
       headers: {
         'Content-Type': 'application/json',

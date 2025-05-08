@@ -296,7 +296,7 @@ export default function FeedbackForm({ isOpen, onClose }) {
         payload.text = feedbackText;
       }
   
-      const response = await axios.post("https://re-assist-backend.onrender.com/api/feedback", payload);
+      const response = await axios.post("http://localhost:5000/api/feedback", payload);
   
       console.log("Feedback submitted:", response.data);
       setSubmitted(true);

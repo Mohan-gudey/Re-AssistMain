@@ -523,7 +523,7 @@
 //     const user = userCredential.user;
 
 //     // Send Firebase user data to backend
-//     const response = await fetch('https://re-assist-backend.onrender.com/api/users/login', {
+//     const response = await fetch('http://localhost:5000/api/users/login', {
 //       method: 'POST',
 //       headers: { 'Content-Type': 'application/json' },
 //       body: JSON.stringify({
@@ -561,7 +561,7 @@
 //     console.log(userCredential)
 
 //     // Send Firebase user data to backend
-//     const response = await fetch('https://re-assist-backend.onrender.com/api/users/register', {
+//     const response = await fetch('http://localhost:5000/api/users/register', {
 //       method: 'POST',
 //       headers: { 'Content-Type': 'application/json' },
 //       body: JSON.stringify({
@@ -950,7 +950,7 @@ const AuthComponent = ({ initialForm = 'signin', onClose }) => {
       const user = userCredential.user;
 
       // Send Firebase user data to backend
-      const response = await fetch('https://re-assist-backend.onrender.com/api/profiles/login', {
+      const response = await fetch('http://localhost:5000/api/profiles/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -999,7 +999,7 @@ const AuthComponent = ({ initialForm = 'signin', onClose }) => {
       const user = userCredential.user;
       // 
       // Send Firebase user data to your backend
-      const response = await fetch('https://re-assist-backend.onrender.com/api/profiles/register', {
+      const response = await fetch('http://localhost:5000/api/profiles/register', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -1016,7 +1016,8 @@ const AuthComponent = ({ initialForm = 'signin', onClose }) => {
         // Optionally store info locally
         localStorage.setItem('firebaseId', user.uid);
         localStorage.setItem('email', user.email);
-
+        localStorage.setItem('token', data.token);
+        console.log("token",data.token)
         // Redirect or show success message
         navigate('/user-details-form');
       } else {
@@ -1042,7 +1043,7 @@ const AuthComponent = ({ initialForm = 'signin', onClose }) => {
       const user = result.user;
       console.log(user)
       // Send Firebase user data to backend
-      const response = await fetch('https://re-assist-backend.onrender.com/api/profiles/login', {
+      const response = await fetch('http://localhost:5000/api/profiles/login', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({

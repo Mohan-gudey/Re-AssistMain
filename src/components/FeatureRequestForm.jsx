@@ -11,7 +11,7 @@ export default function FeatureRequestForm({ isOpen, onClose }) {
     e.preventDefault();
   
     try {
-      const response = await axios.post("https://re-assist-backend.onrender.com/api/feedback", {
+      const response = await axios.post("http://localhost:5000/api/feedback", {
         type: "feature",
         featureTitle: title,            
         featureDescription: description,

@@ -81,7 +81,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
-
 import LandingPage from './pages/LandingPage';
 import Dashboard from './pages/Dashboard';
 import Resources from './pages/Resources';
@@ -119,5 +118,3 @@ const App = () => {
 };
 
 export default App;
-
-

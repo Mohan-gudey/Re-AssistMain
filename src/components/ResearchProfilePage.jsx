@@ -1087,7 +1087,7 @@ export default function ResearchProfilePage() {
   //     }
 
   //     try {
-  //       const response = await fetch(`https://re-assist-backend.onrender.com/api/profiles/profile?firebaseId=${firebaseId}`);
+  //       const response = await fetch(`http://localhost:5000/api/profiles/profile?firebaseId=${firebaseId}`);
   //       const data = await response.json();
   //       console.log("profile data",data)
 
@@ -1126,7 +1126,7 @@ export default function ResearchProfilePage() {
       }
 
       try {
-        const response = await fetch(`https://re-assist-backend.onrender.com/api/profiles/profile?firebaseId=${firebaseId}`);
+        const response = await fetch(`http://localhost:5000/api/profiles/profile?firebaseId=${firebaseId}`);
         const data = await response.json();
         console.log("profile data", data)
 

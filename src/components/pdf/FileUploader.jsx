@@ -114,7 +114,7 @@ function FileUploader({ setAbstract, setKeywords, setRawText, setLoading }) {
     ];
     const fileExt = fileName.slice(fileName.lastIndexOf('.'));
     if (!allowedTypes.includes(fileExt)) {
-      alert(`Unsupported file type: ${fileExt}. Please upload a valid document.`);
+      // alert(`Unsupported file type: ${fileExt}. Please upload a valid document.`);
       return;
     }
 

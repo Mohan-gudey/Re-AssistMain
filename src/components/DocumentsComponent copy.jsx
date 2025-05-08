@@ -52,7 +52,7 @@ export default function DocumentsComponent() {
       try {
         const token = localStorage.getItem('token'); // Get the JWT token
   
-        const response = await axios.get('https://re-assist-backend.onrender.com/api/projects', {
+        const response = await axios.get('http://localhost:5000/api/projects', {
           headers: {
             Authorization: `Bearer ${token}`, // Include the token
           },
