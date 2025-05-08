@@ -357,7 +357,6 @@ export default function Sidebar() {
     { name: "Help", path: "/dashboard/help" },
     { name: "Feedback", path: "/dashboard/feedback", action: openFeedback },
     { name: "Feature Request", path: "/dashboard/feature-request", action: openFeatureRequest },
-    { name: "PDF Summary", path: "/dashboard/pdf-summary"}
   ];
 
   const handleTabClick = (tab) => {
