@@ -969,7 +969,7 @@ const AuthComponent = ({ initialForm = 'signin', onClose }) => {
         // Check if user is new
         if (data.isNewUser) {
           localStorage.setItem('isNewUser', 'true');
-          navigate('/complete-profile');
+          navigate('/dashboard');
         } else {
           localStorage.setItem('isNewUser', 'false');
           navigate('/dashboard');
