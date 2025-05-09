@@ -84,6 +84,19 @@ export default function ChatsComponent() {
     const [dropdownOpenIndex, setDropdownOpenIndex] = useState(null);
     const [middleView, setMiddleView] = useState("default"); // can be "default", "summary", "chat", "grants", "conferences" // Default view
     const dropdownRefs = useRef([]);
+    const [pdfModalOpen, setPdfModalOpen] = useState(false);
+    const [pdfUrl, setPdfUrl] = useState("");
+    const [isOpen, setIsOpen] = useState(false);
+      const [wordDocUrl, setWordDocUrl] = useState("");
+
+      // Function to handle opening the document
+      const openDocumentHandler = (docName, docUrl) => {
+        const confirmOpen = confirm(`Open document: ${docName}?`);
+        if (confirmOpen) {
+          setWordDocUrl(docUrl);  // Set the URL to be displayed in the iframe
+          setIsOpen(true);  // Open the modal
+        }
+      };
     const [expandedPaper, setExpandedPaper] = useState({
       projectIndex: null,
       paperIndex: null,
@@ -127,6 +140,40 @@ export default function ChatsComponent() {
       fetchData();
     }, [selectedProjectIndex]);
     // Add paper to the selected project and save it in the backend
+
+    const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+  const messagesEndRef = useRef(null);
+
+  const getGPTResponse = (userInput) => {
+    const lower = userInput.toLowerCase();
+
+    if (lower.includes("mbpp")) {
+      return "MBPP stands for 'Mostly Basic Python Problems'. It's a dataset with ~1,000 Python coding problems and test cases.";
+    } else if (lower.includes("llms")) {
+      return "Yes, LLMs like GPT-3 and Codex can solve MBPP tasks, especially with few-shot examples. Performance varies by complexity.";
+    } else if (lower.includes("codex")) {
+      return "Codex is an LLM trained specifically on programming tasks. It generally performs better than GPT-3 on code generation.";
+    } else {
+      return "I'm not sure about that, but you can try rephrasing your question.";
+    }
+  };
+
+  const handleSend = () => {
+    if (!input.trim()) return;
+
+    const userMessage = { type: "user", text: input };
+    const botMessage = { type: "bot", text: getGPTResponse(input) };
+
+    setMessages((prev) => [...prev, userMessage, botMessage]);
+    setInput("");
+  };
+
+  useEffect(() => {
+    // Scroll to the bottom on every message update
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
     
     useEffect(() => {
       const handleClickOutside = (event) => {
@@ -1332,13 +1379,6 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                       {projects[activePaper.projectIndex]?.name || "Unknown Project"}
                     </span>
                   </p>
-                   {activePaper.url && (
-                    <p className="text-blue-600 underline break-all">
-                      <a href={activePaper.url} target="_blank" rel="noopener noreferrer">
-                      {activePaper.url}
-                      </a>
-                    </p>
-                  )}
                   <p className="text-xs text-gray-500 mt-1">
                     {activePaper.name.toLowerCase().endsWith(".docx") ||
                     activePaper.name.toLowerCase().endsWith(".doc")
@@ -1355,78 +1395,100 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                 <div className="mt-3 p-4 bg-gray-50 rounded-md border border-blue-50">
                   {(activePaper.name.toLowerCase().endsWith(".docx") ||
                     activePaper.name.toLowerCase().endsWith(".doc")) && (
-                    <div className="flex flex-col items-center justify-center py-8">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-16 w-16 text-blue-500 mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1}
-                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <h3 className="text-blue-700 text-lg font-medium mb-2">
-                        {activePaper.name || "Untitled Paper"}
-                      </h3>
-                      <p className="text-gray-600 text-center max-w-md">
-                        Word document preview is available. In a production environment,
-                        this would render the document content using appropriate libraries.
-                      </p>
+                    <div className="flex items-center justify-between bg-blue-50 border border-blue-200 rounded-md px-4 py-3 my-4">
+                      <div className="flex items-center text-blue-700 font-medium">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 mr-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                          />
+                        </svg>
+                        {activePaper.name || "Untitled Document"}
+                      </div>
                       <button
-                      className="mt-4 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
-                      onClick={() => {
-                        const confirmOpen = confirm(`Open document: ${activePaper.name}?`);
-                        if (confirmOpen) {
-                          window.open(activePaper.url, "_blank");
-                        }
-                      }}
-                    >
-                      Open document
-                    </button>
-
+                        className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-1.5 rounded text-sm"
+                        onClick={() => openDocumentHandler(activePaper.name, activePaper.url)}
+                      >
+                        Open Document
+                      </button>
                     </div>
                   )}
+                 {/* PDF Preview Block */}
                   {activePaper.name.toLowerCase().endsWith(".pdf") && (
-                    <div className="flex flex-col items-center justify-center py-8">
-                      <svg
-                        xmlns="http://www.w3.org/2000/svg"
-                        className="h-16 w-16 text-red-500 mb-4"
-                        fill="none"
-                        viewBox="0 0 24 24"
-                        stroke="currentColor"
-                      >
-                        <path
-                          strokeLinecap="round"
-                          strokeLinejoin="round"
-                          strokeWidth={1}
-                          d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
-                        />
-                      </svg>
-                      <h3 className="text-red-600 text-lg font-medium mb-2">
-                        {activePaper.name || "Untitled Paper"}
-                      </h3>
-                      <p className="text-gray-600 text-center max-w-md">
-                        PDF preview is available. In a production environment, this would
-                        render the PDF content using appropriate libraries.
-                      </p>
+                    <div className="flex items-center justify-between bg-red-50 border border-red-200 rounded-md px-4 py-3 my-4">
+                      <div className="flex items-center text-red-600 font-medium">
+                        <svg
+                          xmlns="http://www.w3.org/2000/svg"
+                          className="h-5 w-5 mr-2"
+                          fill="none"
+                          viewBox="0 0 24 24"
+                          stroke="currentColor"
+                        >
+                          <path
+                            strokeLinecap="round"
+                            strokeLinejoin="round"
+                            strokeWidth={1.5}
+                            d="M7 21h10a2 2 0 002-2V9.414a1 1 0 00-.293-.707l-5.414-5.414A1 1 0 0012.586 3H7a2 2 0 00-2 2v14a2 2 0 002 2z"
+                          />
+                        </svg>
+                        {activePaper.name || "Untitled PDF"}
+                      </div>
                       <button
-                        className="mt-4 bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md text-sm font-medium transition-colors"
+                        className="bg-red-600 hover:bg-red-700 text-white px-4 py-1.5 rounded text-sm"
                         onClick={() => {
-                          const confirmOpen = confirm(`Open PDF: ${activePaper.name} ?`);
-                          if (confirmOpen) {
-                            window.open(activePaper.url, "_blank");
-                          }
+                          setPdfUrl(activePaper.url);
+                          setPdfModalOpen(true);
                         }}
                       >
                         Open PDF
                       </button>
                     </div>
                   )}
+
+                  {pdfModalOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                      <div className="relative bg-white w-11/12 md:w-3/4 h-5/6 rounded-lg shadow-xl overflow-hidden">
+                        <button
+                          className="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl"
+                          onClick={() => setPdfModalOpen(false)}
+                        >
+                          &times;
+                        </button>
+                        <iframe
+                          src={pdfUrl}
+                          title="PDF Document"
+                          className="w-full h-full border-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+
+                    {isOpen && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+                      <div className="relative bg-white w-11/12 md:w-3/4 h-5/6 rounded-lg shadow-xl overflow-hidden">
+                        <button
+                          className="absolute top-2 right-2 text-gray-600 hover:text-black text-2xl"
+                          onClick={() => setIsOpen(false)}
+                        >
+                          &times;
+                        </button>
+                        <iframe
+                          src={`https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(wordDocUrl)}`}
+                          title="Word Document Viewer"
+                          className="w-full h-full border-none"
+                        />
+                      </div>
+                    </div>
+                  )}
+
                   {!activePaper.name.toLowerCase().endsWith(".docx") &&
                     !activePaper.name.toLowerCase().endsWith(".doc") &&
                     !activePaper.name.toLowerCase().endsWith(".pdf") && (
@@ -1443,7 +1505,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                     )}
                   <div>
                   <div>
-                    <h1 className="text-blue-700 font-medium mb-2">Abstract:</h1>
+                    <h1 className="text-blue-700 font-medium mb-2">Summary:</h1>
                     <p className="text-sm text-gray-700 whitespace-pre-line">
                       {activePaper.abstract || 'No abstract available.'}
                     </p>
@@ -1528,7 +1590,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                   </div>
                 </div>
               ) : selectedProjectIndex !== null && !activePaper ? (
-                <div className="max-w-4xl mx-auto">
+                <div className="max-w-6xl mx-auto">
                 {middleView === "default" || middleView === "papers" ? (
                   <>
                     <div className="text-center mt-8">
@@ -1545,7 +1607,7 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                       </svg>
                       Recommended Papers
                     </h3>
-                    <div className="space-y-5 overflow-y-scroll max-h-[60vh] mt-2">
+                    <div className="space-y-5 overflow-y-scroll max-h-[70vh] mt-2">
                       {papers.map((paper, index) => (
                         <div key={index} className="bg-white shadow-md rounded-lg p-4">
                           <a href={paper.link} target="_blank" rel="noopener noreferrer" className="inline-block text-gray-800 hover:text-blue-700 font-medium text-xl">
@@ -1566,59 +1628,90 @@ const handleBibEntrySelect = (bibEntry, projectIndex, bibIndex) => {
                   </>
                 ) : middleView === "summary" ? (
                   <>
-                    <h2 className="text-xl font-bold mb-4 text-blue-700">Summary: {projects[selectedProjectIndex].name}</h2>
-                    <p className="text-gray-600 mb-4">Displaying summary of all papers in this project.</p>
-                    <ul className="space-y-3">
-                      {projects[selectedProjectIndex]?.papers.map((paper, idx) => (
-                        <li key={idx} className="bg-white p-4 rounded shadow-sm border border-blue-100">
-                          <h3 className="font-semibold text-gray-800">{paper.title || "Untitled Paper"}</h3>
-                          <p className="text-sm text-gray-500 mt-1">No detailed summary available yet.</p>
-                        </li>
-                      ))}
-                    </ul>
-                  </>
-                ) : middleView === "chat" ? (
-                <div className="text-center mt-8">
-                <p className="text-sm text-gray-700">Welcome to Re-Assist.</p>
-                <p className="mt-2 text-sm text-gray-600">Select or create a project to get started.</p>
-                {/* Paper recommendations for new users */}
-                <div className="mt-8 max-w-lg mx-auto bg-white rounded-lg p-4 shadow-md border border-blue-100">
-                  <h3 className="text-blue-700 font-medium text-sm mb-3 flex items-center gap-2">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" viewBox="0 0 20 20" fill="currentColor">
-                      <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.838L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.838l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z" />
-                    </svg>
-                    Trending Papers
-                  </h3>
-                  <ul className="space-y-2">
-                    {recommendations.map((rec, idx) => (
-                      <li key={idx} className="bg-gray-50 p-2 rounded text-sm hover:bg-blue-50 transition-colors cursor-pointer text-gray-700">
-                        {rec}
+                  <h2 className="text-2xl font-bold mb-4 text-blue-500 mt-10">
+                    Project Summary: {projects[selectedProjectIndex].name}
+                  </h2>
+                  <p className="text-gray-600 mb-6 text-base">
+                    Below is a detailed summary of papers included in this project.
+                  </p>
+
+                  <div className="bg-white border border-gray-200 rounded-lg shadow-md p-6 transition-all hover:shadow-lg">
+                    <h3 className="text-lg font-semibold text-gray-900 mb-3">
+                      📄 Can LLMs Generate Functional Code: A Study Using MBPP Dataset
+                    </h3>
+
+                    <p className="text-gray-700 mb-4">
+                      This study explores the ability of Large Language Models (LLMs), such as GPT-3 and Codex, to generate correct and functional Python code using the <strong>MBPP (Mostly Basic Python Problems)</strong> dataset, which consists of nearly 1,000 problems with test cases. The research tests models on their code accuracy, generalization, and few-shot learning capabilities.
+                    </p>
+
+                    <ul className="list-disc list-inside space-y-2 text-gray-700">
+                      <li>
+                        <strong>Dataset:</strong> MBPP includes ~1,000 programming tasks with natural language descriptions and unit tests.
                       </li>
-                    ))}
-                  </ul>
+                      <li>
+                        <strong>Goal:</strong> Assess whether generated code passes all test cases reliably.
+                      </li>
+                      <li>
+                        <strong>Models Evaluated:</strong> General-purpose (GPT-3) and code-specialized (Codex).
+                      </li>
+                      <li>
+                        <strong>Key Findings:</strong>
+                        <ul className="list-disc ml-6 mt-1 space-y-1 text-sm">
+                          <li>Codex outperforms GPT-3 due to code-focused fine-tuning.</li>
+                          <li>Few-shot examples significantly improve code generation accuracy.</li>
+                          <li>LLMs struggle with ambiguous instructions and tasks needing deep reasoning.</li>
+                        </ul>
+                      </li>
+                      <li>
+                        <strong>Conclusion:</strong> LLMs can reliably generate functional code for well-specified problems, but have limitations in more complex or nuanced programming tasks.
+                      </li>
+                    </ul>
+                  </div>
+                </>
+                ) : middleView === "chat" ? (
+
+              <div className="w-full flex h-[90vh] flex-col bg-gray-50">
+                {/* Header */}
+                <div className="bg-white py-4 px-6 border-b">
+                  <h1 className="text-xl font-semibold text-blue-700">Re-Assist GPT Chat</h1>
+                  <p className="text-sm text-gray-600 mt-1">Ask anything about LLMs, MBPP, or Codex.</p>
                 </div>
-                <div className="absolute bottom-3 w-[50%] border-t border-blue-100 pt-3">
-                <div className="flex gap-2">
+
+                {/* Chat Container */}
+                <div className="flex-1 overflow-y-auto  px-4 py-6 space-y-4">
+                  {messages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`text-sm p-3 rounded-md max-w-xl ${
+                        msg.type === "user"
+                          ? "bg-blue-100 text-right ml-auto"
+                          : "bg-white text-left mr-auto border border-gray-200"
+                      }`}
+                    >
+                      {msg.text}
+                    </div>
+                  ))}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input Area */}
+                <div className="border-t bg-white px-4 py-3 flex gap-2">
                   <input
-                    className="flex-1 bg-white text-gray-800 p-2 rounded-md border border-blue-200 focus:border-blue-500 focus:outline-none text-sm"
-                    placeholder="Type a message"
-                    value={message}
-                    onChange={(e) => setMessage(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && handleSendMessage()}
+                    className="flex-1 bg-white text-gray-800 p-2 rounded-md border border-blue-300 focus:border-blue-500 focus:outline-none text-sm"
+                    placeholder="Type a question..."
+                    value={input}
+                    onChange={(e) => setInput(e.target.value)}
+                    onKeyPress={(e) => e.key === "Enter" && handleSend()}
                   />
-                  <button 
-                    className="bg-blue-600 hover:bg-blue-700 p-2 rounded-md transition-colors text-white"
-                    onClick={handleSendMessage}
+                  <button
+                    onClick={handleSend}
+                    className="bg-blue-600 hover:bg-blue-700 p-2 px-4 rounded-md text-white text-sm"
                   >
-                    <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-                    </svg>
+                    Send
                   </button>
                 </div>
-  
-                
               </div>
-              </div>
+
                 ) :middleView === "grants" ? (
                   <div className="py-6 px-4 sm:px-6 lg:px-8">
                     <div className="flex justify-between items-center mb-4">

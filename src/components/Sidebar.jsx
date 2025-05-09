@@ -321,9 +321,11 @@
 import React, { useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { FaBrain } from 'react-icons/fa';
-import { IoIosNotifications } from "react-icons/io";
+import { IoIosNotifications, IoIosArrowDown } from "react-icons/io"; // ✅ Fix here
 import FeedbackForm from "./FeedbackForm";
 import FeatureRequestForm from './FeatureRequestForm';
+import { ChevronDown, ChevronUp } from "lucide-react";
+
 
 export default function Sidebar() {
   const navigate = useNavigate();
@@ -340,7 +342,7 @@ export default function Sidebar() {
   ];
 
   const useremail = localStorage.getItem("email");
-  console.log("role:", useremail);
+  // console.log("role:", useremail);
 
   const openFeedback = () => setFeedbackOpen(true);
   const closeFeedback = () => setFeedbackOpen(false);
@@ -354,11 +356,9 @@ export default function Sidebar() {
     { name: "Collaborators", path: "/dashboard/collaborators" },
     { name: "Grants", path: "/dashboard/grants" },
     { name: "Conferences", path: "/dashboard/conferences" },
-    { name: "Help", path: "/dashboard/help" },
-    { name: "Feedback", path: "/dashboard/feedback", action: openFeedback },
-    { name: "Feature Request", path: "/dashboard/feature-request", action: openFeatureRequest },
   ];
-
+  const [showHelpDropdown, setShowHelpDropdown] = useState(false);
+  
   const handleTabClick = (tab) => {
     if (tab.action) {
       tab.action();
@@ -380,7 +380,7 @@ export default function Sidebar() {
           </div>
 
           {/* Tabs */}
-          <div className="flex space-x-6">
+          <div className="flex space-x-6 relative">
             {allTabs.map((tab) => (
               <button
                 key={tab.name}
@@ -394,8 +394,48 @@ export default function Sidebar() {
                 {tab.name}
               </button>
             ))}
-          </div>
 
+            {/* Help tab with dropdown */}
+            <div className="relative">
+              <button
+                className={`flex items-center gap-1 px-4 py-2 rounded-md transition-colors ${
+                  currentPath === "/dashboard/help"
+                    ? "bg-blue-500 text-white font-semibold shadow-sm"
+                    : "hover:bg-blue-100 text-blue-700"
+                }`}
+                onClick={() => {
+                  navigate("/dashboard/help");
+                  setShowHelpDropdown((prev) => !prev);
+                }}
+              >
+                Help
+                {showHelpDropdown ? <ChevronUp size={17} className="mt-0" /> : <ChevronDown size={17} className="mt-1"/>}
+              </button>
+
+              {showHelpDropdown && (
+                <div className="absolute z-10 mt-2 bg-white border border-gray-200 rounded-lg shadow-md w-44 right-0">
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-100 text-blue-700"
+                    onClick={() => {
+                      setShowHelpDropdown(false);
+                      openFeedback();
+                    }}
+                  >
+                    Feedback
+                  </button>
+                  <button
+                    className="block w-full text-left px-4 py-2 text-sm hover:bg-blue-100 text-blue-700"
+                    onClick={() => {
+                      setShowHelpDropdown(false);
+                      openFeatureRequest();
+                    }}
+                  >
+                    Feature Request
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
           {/* Notification Icon */}
           <div className="relative cursor-pointer" onClick={() => setShowNotifications(!showNotifications)}>
             <IoIosNotifications className="text-2xl text-blue-700" />
